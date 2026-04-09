@@ -3,80 +3,73 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cinematic Motion | Refined</title>
+    <title>Cinematic Portfolio | Responsive V3</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;900&display=swap" rel="stylesheet">
     <style>
         :root { --bg: #000; --accent: #ff3e00; --text: #fff; }
         * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; overflow-x: hidden; }
         
-        body { 
-            background: var(--bg); 
-            color: var(--text); 
-            font-family: 'Inter', sans-serif; 
-            overflow-x: hidden;
-            -webkit-font-smoothing: antialiased;
-        }
-
+        /* Progress Bar */
         .scroll-progress {
             position: fixed; top: 0; left: 0; width: 0%; height: 4px;
             background: var(--accent); z-index: 10000;
         }
 
-        section { position: relative; width: 100%; min-height: 100vh; display: flex; align-items: center; justify-content: center; }
+        section { position: relative; width: 100%; min-height: 100vh; display: flex; align-items: center; justify-content: center; overflow: hidden; }
 
         /* Hero */
-        .hero { background: #000; z-index: 10; }
-        .hero-title { font-size: clamp(3rem, 15vw, 12rem); font-weight: 900; filter: blur(20px); opacity: 0; text-transform: uppercase; }
+        .hero { background: #050505; z-index: 10; }
+        .hero-title { font-size: clamp(3rem, 12vw, 15rem); font-weight: 900; filter: blur(20px); transform: scale(1.5); opacity: 0; text-transform: uppercase; }
 
         /* Stacking Section - PINNED */
-        .stack-section { 
-            height: 100vh; /* Controlled by GSAP Pinning */
-            background: #000;
-            overflow: hidden;
-        }
-
-        .stack-container { 
-            position: relative; 
-            width: 100%; 
-            height: 100vh; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-        }
-
+        .stack-section { height: 300vh; background: #0a0a0a; } /* Increased height for slower scroll */
+        .stack-container { width: 100%; height: 100vh; display: flex; align-items: center; justify-content: center; position: relative; }
         .stack-card {
             position: absolute; 
-            width: clamp(280px, 70vw, 900px); 
-            height: clamp(350px, 60vh, 600px); 
-            background: #111;
+            width: clamp(280px, 60vw, 800px); 
+            height: clamp(350px, 60vh, 500px); 
+            background: #1a1a1a;
             border: 1px solid #333; 
-            border-radius: clamp(10px, 2vw, 30px); 
+            border-radius: 20px; 
             display: flex;
             flex-direction: column;
             align-items: center; 
             justify-content: center; 
+            font-size: clamp(1rem, 3vw, 2.5rem);
             padding: 2rem;
-            box-shadow: 0 50px 100px rgba(0,0,0,0.8);
-            transform: translateY(100vh) rotate(10deg); /* Start off-screen */
+            text-align: center;
+            box-shadow: 0 40px 100px rgba(0,0,0,0.5);
+            transform: translateY(100vh); /* Start off-screen */
         }
-
-        .stack-card h2 { font-size: clamp(1.5rem, 5vw, 4rem); font-weight: 900; text-align: center; }
 
         /* Conveyor */
-        .conveyor-section { height: 100vh; background: var(--accent); color: #000; overflow: hidden; }
-        .conveyor-track { display: flex; gap: 5vw; padding: 0 2rem; will-change: transform; }
-        .conveyor-item { font-size: clamp(4rem, 18vw, 15rem); font-weight: 900; white-space: nowrap; }
+        .conveyor-section { height: 200vh; background: var(--accent); color: #000; }
+        .conveyor-track { display: flex; gap: 5vw; padding: 0 50px; will-change: transform; }
+        .conveyor-item { font-size: clamp(3rem, 15vw, 12rem); font-weight: 900; white-space: nowrap; line-height: 1; }
+
+        /* Split Reveal */
+        .split-section { display: flex; height: 100vh; width: 100%; }
+        .split-side { width: 50%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: clamp(1.5rem, 5vw, 6vw); font-weight: 900; }
+        .left-side { background: #111; transform: translateX(-100%); }
+        .right-side { background: #222; transform: translateX(100%); }
 
         /* Text Fill */
-        .text-fill-section { height: 100vh; background: #000; }
-        .text-fill { font-size: clamp(2rem, 8vw, 7rem); font-weight: 900; color: rgba(255,255,255,0.1); text-align: center; width: 90%; }
-        .text-fill span { color: var(--accent); display: inline-block; width: 0; overflow: hidden; white-space: nowrap; vertical-align: bottom; }
+        .text-fill-section { height: 200vh; background: #000; }
+        .text-fill { font-size: clamp(2rem, 6vw, 8vw); font-weight: 900; color: rgba(255,255,255,0.1); width: 90%; text-align: center; }
+        .text-fill span { color: var(--accent); display: inline-block; width: 0; overflow: hidden; white-space: nowrap; }
 
-        /* Responsiveness for small screens */
-        @media (max-width: 768px) {
-            .stack-card { width: 85vw; height: 50vh; }
-            .text-fill { font-size: 10vw; }
-        }
+        /* Floating Parallax */
+        .float-box { position: absolute; width: clamp(100px, 15vw, 200px); height: clamp(100px, 15vw, 200px); background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.2); }
+
+        /* Zoom Circle */
+        .zoom-section { height: 100vh; background: #000; }
+        .zoom-circle { width: 100px; height: 100px; background: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #000; font-weight: 900; font-size: 0.8rem; }
+
+        /* Inversion */
+        .invert-trigger { height: 100vh; background: #fff; color: #000; font-size: clamp(1.5rem, 4vw, 5vw); text-align: center; padding: 2rem; }
+
+        .outro { height: 100vh; background: #000; text-align: center; }
     </style>
 </head>
 <body>
@@ -85,42 +78,62 @@
 
     <main>
         <section class="hero">
-            <h1 class="hero-title">VISION</h1>
+            <h1 class="hero-title">CINEMATIC</h1>
         </section>
 
         <section class="stack-section">
             <div class="stack-container">
-                <div class="stack-card card-1">
-                    <h2>01. IMMERSIVE</h2>
-                    <p style="margin-top: 1rem; opacity: 0.6;">High-fidelity scroll interaction.</p>
+                <div class="stack-card card-1" style="z-index: 10;">
+                    <h2>01. THE VISION</h2>
+                    <p style="font-size: 1rem; opacity: 0.5; margin-top: 1rem;">Scroll deep into motion</p>
                 </div>
-                <div class="stack-card card-2">
-                    <h2>02. ADAPTIVE</h2>
-                    <p style="margin-top: 1rem; opacity: 0.6;">Built for every modern device.</p>
+                <div class="stack-card card-2" style="z-index: 9;">
+                    <h2>02. THE DEPTH</h2>
+                    <p style="font-size: 1rem; opacity: 0.5; margin-top: 1rem;">Layered scroll pinning</p>
                 </div>
-                <div class="stack-card card-3">
-                    <h2>03. CINEMATIC</h2>
-                    <p style="margin-top: 1rem; opacity: 0.6;">Controlled motion sequences.</p>
+                <div class="stack-card card-3" style="z-index: 8;">
+                    <h2>03. THE MOTION</h2>
+                    <p style="font-size: 1rem; opacity: 0.5; margin-top: 1rem;">Responsive and smooth</p>
                 </div>
             </div>
         </section>
 
         <section class="conveyor-section">
             <div class="conveyor-track">
-                <div class="conveyor-item">PRECISION</div>
+                <div class="conveyor-item">CONTROLLED</div>
                 <div class="conveyor-item">—</div>
-                <div class="conveyor-item">MOTION</div>
+                <div class="conveyor-item">HORIZONTAL</div>
                 <div class="conveyor-item">—</div>
-                <div class="conveyor-item">DESIGN</div>
+                <div class="conveyor-item">SCROLLING</div>
             </div>
+        </section>
+
+        <section class="split-section">
+            <div class="split-side left-side">CREATIVE</div>
+            <div class="split-side right-side">ENGINE</div>
         </section>
 
         <section class="text-fill-section">
             <div class="text-fill">THE FUTURE IS <span>THE FUTURE IS</span></div>
         </section>
 
-        <section style="height: 60vh; background: #000;">
-            <h2 style="font-size: 1.5rem; letter-spacing: 5px; opacity: 0.4;">FIN</h2>
+        <section style="height: 150vh; background: #000;">
+            <div class="float-box" style="top: 20%; left: 10%;"></div>
+            <div class="float-box" style="top: 50%; left: 70%;"></div>
+            <div class="float-box" style="top: 80%; left: 30%;"></div>
+            <h2 style="font-size: clamp(2rem, 5vw, 6vw); z-index: 10;">PARALLAX DEBRIS</h2>
+        </section>
+
+        <section class="zoom-section">
+            <div class="zoom-circle">EXPLORE</div>
+        </section>
+
+        <section class="invert-trigger">
+            <h2>COLOR INVERSION</h2>
+        </section>
+
+        <section class="outro">
+            <h2 style="font-size: clamp(2rem, 3vw, 5vw);">GENESIS STUDIO 2026</h2>
         </section>
     </main>
 
@@ -131,80 +144,87 @@
     <script>
         gsap.registerPlugin(ScrollTrigger);
 
+        // 1. Smooth Scroll
         const lenis = new Lenis({ duration: 1.2, lerp: 0.1 });
         function raf(time) { lenis.raf(time); requestAnimationFrame(raf); }
         requestAnimationFrame(raf);
 
-        // Progress Bar
+        // 2. Progress Bar
         gsap.to(".scroll-progress", {
             width: "100%", scrollTrigger: { scrub: 0.3 }
         });
 
-        // 1. Hero Animation
+        // 3. Hero Reveal
         gsap.to(".hero-title", {
-            filter: "blur(0px)", opacity: 1, scale: 0.9,
-            scrollTrigger: {
-                trigger: ".hero",
-                start: "top top",
-                end: "bottom top",
-                scrub: true,
-                pin: true
-            }
+            filter: "blur(0px)", scale: 1, opacity: 1,
+            scrollTrigger: { trigger: ".hero", start: "top top", end: "bottom top", scrub: true, pin: true }
         });
 
-        // 2. MASTER PINNED STACKING CARDS
-        // We create one timeline for the entire pinned section
+        // 4. MASTER PINNED STACKING (Smoother)
         const stackTl = gsap.timeline({
             scrollTrigger: {
                 trigger: ".stack-section",
                 start: "top top",
-                end: "+=300% top", // Scroll distance is 3x the screen height
+                end: "bottom top",
                 pin: true,
                 scrub: 1,
-                anticipatePin: 1
             }
         });
 
-        // Card 1 Reveal
-        stackTl.to(".card-1", { y: 0, rotate: 0, duration: 1 });
-        stackTl.to({}, { duration: 0.5 }); // PAUSE for reading
+        // Entry logic for cards
+        stackTl.to(".card-1", { y: 0, duration: 1 })
+               .to(".card-2", { y: 0, x: 20, rotate: -2, duration: 1 }, "+=0.2")
+               .to(".card-1", { scale: 0.95, opacity: 0.5, duration: 1 }, "<")
+               .to(".card-3", { y: 0, x: -20, rotate: 2, duration: 1 }, "+=0.2")
+               .to(".card-2", { scale: 0.95, opacity: 0.5, duration: 1 }, "<");
 
-        // Card 2 Slides Over Card 1
-        stackTl.to(".card-1", { scale: 0.9, opacity: 0.5, y: -20, duration: 1 }, "c2")
-               .to(".card-2", { y: 0, rotate: 0, duration: 1 }, "c2");
-        stackTl.to({}, { duration: 0.5 }); // PAUSE
-
-        // Card 3 Slides Over Card 2
-        stackTl.to(".card-2", { scale: 0.85, opacity: 0.3, y: -40, duration: 1 }, "c3")
-               .to(".card-3", { y: 0, rotate: 0, duration: 1 }, "c3");
-        stackTl.to({}, { duration: 0.8 }); // Final PAUSE
-
-        // 3. Pinned Conveyor
+        // 5. Pinned Conveyor
         gsap.to(".conveyor-track", {
-            x: "-60%",
+            x: "-70%",
             scrollTrigger: {
                 trigger: ".conveyor-section",
                 start: "top top",
-                end: "+=200% top",
+                end: "bottom top",
                 pin: true,
                 scrub: 1
             }
         });
 
-        // 4. Text Fill
+        // 6. Split Reveal
+        gsap.timeline({
+            scrollTrigger: { trigger: ".split-section", start: "top top", end: "bottom top", scrub: 1, pin: true }
+        })
+        .to(".left-side", { x: "0%" }, 0)
+        .to(".right-side", { x: "0%" }, 0);
+
+        // 7. Text Fill
         gsap.to(".text-fill span", {
             width: "100%",
-            scrollTrigger: {
-                trigger: ".text-fill-section",
-                start: "top top",
-                end: "+=100% top",
-                pin: true,
-                scrub: 1
-            }
+            scrollTrigger: { trigger: ".text-fill-section", start: "top top", end: "bottom top", pin: true, scrub: 1 }
         });
 
-        // Optimization: Refresh ScrollTrigger on resize
-        window.addEventListener("resize", () => ScrollTrigger.refresh());
+        // 8. Parallax Boxes
+        gsap.utils.toArray(".float-box").forEach(box => {
+            gsap.to(box, {
+                y: -300, rotate: 360,
+                scrollTrigger: { trigger: box, start: "top bottom", end: "bottom top", scrub: 2 }
+            });
+        });
+
+        // 9. Zoom Circle
+        gsap.to(".zoom-circle", {
+            scale: 80,
+            scrollTrigger: { trigger: ".zoom-section", start: "top top", end: "bottom top", pin: true, scrub: 1 }
+        });
+
+        // 10. Inversion
+        gsap.to("body", {
+            backgroundColor: "#fff", color: "#000",
+            scrollTrigger: { trigger: ".invert-trigger", start: "top 50%", end: "bottom 50%", scrub: true }
+        });
+        
+        // Final Fix for refresh on resize
+        window.addEventListener('resize', () => { ScrollTrigger.refresh(); });
     </script>
 </body>
 </html>
