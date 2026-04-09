@@ -1,335 +1,799 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Cinematic Scroll Portfolio</title>
-  
-  <!-- GSAP & ScrollTrigger -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
-  <!-- Lenis Smooth Scroll -->
-  <script src="https://unpkg.com/lenis@1.1.18/dist/lenis.min.js"></script>
-
-  <style>
-    :root {
-      --bg: #0a0a0c;
-      --surface: #141418;
-      --surface-hover: #1a1a20;
-      --text: #f0f0f2;
-      --text-muted: #8a8a94;
-      --accent: #6b5ce7;
-      --accent-glow: rgba(107, 92, 231, 0.3);
-      --radius: 12px;
-      --transition: cubic-bezier(0.25, 0.46, 0.45, 0.94);
-    }
-
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cinematic Scroll Portfolio</title>
     
-    html.lenis, html.lenis body {
-      height: auto;
-      overflow-x: hidden;
-    }
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- GSAP & ScrollTrigger -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    
+    <!-- Lenis Smooth Scroll -->
+    <script src="https://cdn.jsdelivr.net/gh/studio-freight/lenis@1.0.29/bundled/lenis.min.js"></script>
 
-    body {
-      background: var(--bg);
-      color: var(--text);
-      font-family: 'Inter', system-ui, -apple-system, sans-serif;
-      line-height: 1.5;
-      overflow-x: hidden;
-    }
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Space+Grotesk:wght@300;500;700&display=swap');
 
-    /* Utility */
-    .container {
-      max-width: 1400px;
-      margin: 0 auto;
-      padding: 0 clamp(1.5rem, 5vw, 4rem);
-    }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-    section {
-      position: relative;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-    }
+        html, body {
+            overflow-x: hidden;
+            background-color: #0a0a0a;
+            color: #ffffff;
+            font-family: 'Inter', sans-serif;
+        }
 
-    /* Hero */
-    .hero {
-      text-align: center;
-      padding-top: 10vh;
-    }
-    .hero-title {
-      font-size: clamp(3rem, 12vw, 9rem);
-      font-weight: 800;
-      letter-spacing: -0.04em;
-      line-height: 0.9;
-      margin-bottom: 1.5rem;
-      background: linear-gradient(135deg, #fff 0%, #8a8a94 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-    .hero-sub {
-      font-size: clamp(1rem, 2vw, 1.5rem);
-      color: var(--text-muted);
-      max-width: 600px;
-      margin: 0 auto;
-    }
-    .scroll-hint {
-      margin-top: 4rem;
-      font-size: 0.85rem;
-      color: var(--accent);
-      opacity: 0.7;
-      animation: bounce 2s infinite;
-    }
-    @keyframes bounce {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(8px); }
-    }
+        /* Hide scrollbar for cleaner look */
+        ::-webkit-scrollbar {
+            width: 0px;
+            background: transparent;
+        }
 
-    /* Conveyor Belt Section */
-    .conveyor-section {
-      overflow: hidden;
-      background: var(--surface);
-      padding: 10vh 0;
-    }
-    .conveyor-track {
-      display: flex;
-      gap: clamp(1rem, 3vw, 2.5rem);
-      padding: 0 clamp(1.5rem, 5vw, 4rem);
-      width: max-content;
-    }
-    .conveyor-item {
-      width: clamp(280px, 25vw, 400px);
-      aspect-ratio: 3/4;
-      background: var(--bg);
-      border-radius: var(--radius);
-      border: 1px solid rgba(255,255,255,0.08);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.2rem;
-      font-weight: 600;
-      color: var(--text-muted);
-      box-shadow: 0 10px 30px rgba(0,0,0,0.4);
-      position: relative;
-      overflow: hidden;
-    }
-    .conveyor-item::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(135deg, transparent 40%, var(--accent-glow) 100%);
-      opacity: 0;
-      transition: opacity 0.4s var(--transition);
-    }
-    .conveyor-item:hover::before { opacity: 1; }
+        .font-display {
+            font-family: 'Space Grotesk', sans-serif;
+        }
 
-    /* Projects Grid */
-    .projects {
-      padding: 15vh 0;
-    }
-    .section-title {
-      font-size: clamp(2rem, 5vw, 4rem);
-      margin-bottom: 5rem;
-      font-weight: 700;
-      letter-spacing: -0.02em;
-    }
-    .projects-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 3rem;
-    }
-    .card-wrapper {
-      will-change: transform;
-      perspective: 1000px;
-    }
-    .project-card {
-      background: var(--surface);
-      border-radius: var(--radius);
-      padding: 2rem;
-      border: 1px solid rgba(255,255,255,0.05);
-      transition: transform 0.3s var(--transition), box-shadow 0.3s var(--transition);
-      height: 100%;
-      display: flex;
-      flex-direction: column;
-      gap: 1rem;
-    }
-    .project-card:hover {
-      transform: translateY(-8px) scale(1.02);
-      box-shadow: 0 20px 40px rgba(0,0,0,0.5);
-      border-color: var(--accent);
-    }
-    .card-tag {
-      display: inline-block;
-      background: rgba(107, 92, 231, 0.15);
-      color: var(--accent);
-      padding: 0.3rem 0.8rem;
-      border-radius: 99px;
-      font-size: 0.75rem;
-      font-weight: 600;
-      width: fit-content;
-    }
-    .card-title {
-      font-size: 1.5rem;
-      font-weight: 700;
-    }
-    .card-desc {
-      color: var(--text-muted);
-      font-size: 0.95rem;
-    }
+        /* Card hover effects */
+        .project-card {
+            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s ease;
+        }
 
-    /* Footer */
-    .contact {
-      min-height: 50vh;
-      text-align: center;
-      background: var(--surface);
-      border-top: 1px solid rgba(255,255,255,0.05);
-    }
-    .contact h2 {
-      font-size: clamp(2rem, 6vw, 5rem);
-      margin-bottom: 1rem;
-    }
-    .contact p { color: var(--text-muted); }
+        .project-card:hover {
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.5);
+        }
 
-    /* Responsive */
-    @media (max-width: 768px) {
-      .projects-grid { grid-template-columns: 1fr; gap: 2rem; }
-      .conveyor-item { width: 80vw; }
-    }
-  </style>
+        .project-card:hover .card-overlay {
+            opacity: 1;
+        }
+
+        .card-overlay {
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+
+        /* Text reveal animation helper */
+        .char {
+            display: inline-block;
+            transform: translateY(100%);
+            opacity: 0;
+        }
+
+        /* Horizontal scroll section */
+        .horizontal-section {
+            height: 100vh;
+            width: 100%;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .horizontal-track {
+            display: flex;
+            gap: 3rem;
+            padding: 0 5vw;
+            will-change: transform;
+        }
+
+        /* Gradient backgrounds */
+        .gradient-1 {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .gradient-2 {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        .gradient-3 {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+
+        .gradient-4 {
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+        }
+
+        /* Noise texture overlay */
+        .noise {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            opacity: 0.03;
+            z-index: 9999;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+        }
+
+        /* Magnetic cursor effect */
+        .cursor-dot,
+        .cursor-outline {
+            position: fixed;
+            top: 0;
+            left: 0;
+            transform: translate(-50%, -50%);
+            border-radius: 50%;
+            z-index: 10000;
+            pointer-events: none;
+        }
+
+        .cursor-dot {
+            width: 8px;
+            height: 8px;
+            background-color: white;
+        }
+
+        .cursor-outline {
+            width: 40px;
+            height: 40px;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            transition: width 0.2s, height 0.2s, background-color 0.2s;
+        }
+
+        .cursor-outline.hover {
+            width: 80px;
+            height: 80px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-color: transparent;
+        }
+
+        @media (max-width: 768px) {
+            .cursor-dot, .cursor-outline {
+                display: none;
+            }
+        }
+    </style>
 </head>
 <body>
 
-  <main>
-    <section class="hero">
-      <div class="container">
-        <h1 class="hero-title">Motion &<br>Code</h1>
-        <p class="hero-sub">Scroll to experience a fully scroll-driven, reversible animation system.</p>
-        <div class="scroll-hint">↓ Scroll down</div>
-      </div>
-    </section>
+    <!-- Noise Overlay -->
+    <div class="noise"></div>
 
-    <section class="conveyor-section">
-      <div class="conveyor-track">
-        <div class="conveyor-item">UI/UX Design</div>
-        <div class="conveyor-item">WebGL Experiments</div>
-        <div class="conveyor-item">Creative Dev</div>
-        <div class="conveyor-item">3D Motion</div>
-        <div class="conveyor-item">Interactive Prototypes</div>
-        <div class="conveyor-item">Performance Art</div>
-        <div class="conveyor-item">System Design</div>
-      </div>
-    </section>
+    <!-- Custom Cursor -->
+    <div class="cursor-dot hidden md:block"></div>
+    <div class="cursor-outline hidden md:block"></div>
 
-    <section class="projects">
-      <div class="container">
-        <h2 class="section-title">Selected Works</h2>
-        <div class="projects-grid">
-          <div class="card-wrapper"><div class="project-card"><span class="card-tag">React</span><h3 class="card-title">Nova Dashboard</h3><p class="card-desc">Real-time analytics with fluid data visualization.</p></div></div>
-          <div class="card-wrapper"><div class="project-card"><span class="card-tag">Three.js</span><h3 class="card-title">Aether World</h3><p class="card-desc">Immersive 3D environment with dynamic lighting.</p></div></div>
-          <div class="card-wrapper"><div class="project-card"><span class="card-tag">GSAP</span><h3 class="card-title">Chrono Flow</h3><p class="card-desc">Scroll-driven timeline for archival storytelling.</p></div></div>
-          <div class="card-wrapper"><div class="project-card"><span class="card-tag">Framer</span><h3 class="card-title">Velo UI</h3><p class="card-desc">Component system built for rapid prototyping.</p></div></div>
-          <div class="card-wrapper"><div class="project-card"><span class="card-tag">WebGL</span><h3 class="card-title">Prism Engine</h3><p class="card-desc">Real-time shader playground for creatives.</p></div></div>
-          <div class="card-wrapper"><div class="project-card"><span class="card-tag">Vue</span><h3 class="card-title">Orbit CMS</h3><p class="card-desc">Headless content manager with drag-and-drop.</p></div></div>
+    <!-- Navigation -->
+    <nav class="fixed top-0 left-0 w-full z-50 px-6 py-6 mix-blend-difference">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <div class="text-2xl font-display font-bold tracking-tighter hover-target">PORTFOLIO</div>
+            <div class="hidden md:flex gap-8 text-sm font-medium tracking-widest">
+                <a href="#work" class="hover-target opacity-70 hover:opacity-100 transition-opacity">WORK</a>
+                <a href="#about" class="hover-target opacity-70 hover:opacity-100 transition-opacity">ABOUT</a>
+                <a href="#contact" class="hover-target opacity-70 hover:opacity-100 transition-opacity">CONTACT</a>
+            </div>
         </div>
-      </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="relative min-h-screen flex items-center justify-center overflow-hidden bg-neutral-900">
+        <div class="absolute inset-0 z-0">
+            <div class="absolute inset-0 bg-gradient-to-b from-purple-900/20 via-transparent to-black"></div>
+        </div>
+        
+        <div class="relative z-10 text-center px-6 max-w-6xl mx-auto">
+            <h1 class="hero-title font-display text-6xl md:text-8xl lg:text-9xl font-bold leading-none tracking-tighter mb-8">
+                <span class="block overflow-hidden">
+                    <span class="hero-line inline-block">CREATIVE</span>
+                </span>
+                <span class="block overflow-hidden">
+                    <span class="hero-line inline-block gradient-text bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-pink-600">DEVELOPER</span>
+                </span>
+            </h1>
+            <p class="hero-subtitle text-lg md:text-2xl text-neutral-400 max-w-2xl mx-auto font-light leading-relaxed opacity-0">
+                Crafting immersive digital experiences through scroll-driven animations and interactive design.
+            </p>
+        </div>
+
+        <div class="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 opacity-60">
+            <span class="text-xs tracking-widest">SCROLL</span>
+            <div class="w-px h-12 bg-gradient-to-b from-white to-transparent"></div>
+        </div>
     </section>
 
-    <section class="contact">
-      <div class="container">
-        <h2>Let's Build</h2>
-        <p>Next-gen interactive experiences.</p>
-      </div>
+    <!-- Conveyor Belt Section - Cards from sides -->
+    <section class="relative py-32 bg-neutral-900 overflow-hidden" id="work">
+        <div class="max-w-7xl mx-auto px-6 mb-20">
+            <h2 class="section-title font-display text-5xl md:text-7xl font-bold mb-6">Selected Work</h2>
+            <div class="w-24 h-1 bg-gradient-to-r from-purple-500 to-pink-500"></div>
+        </div>
+
+        <div class="space-y-32">
+            <!-- Card 1 - Slides from Left -->
+            <div class="conveyor-card-left relative px-6">
+                <div class="max-w-6xl mx-auto">
+                    <div class="project-card group relative bg-neutral-800 rounded-3xl overflow-hidden cursor-pointer hover-target">
+                        <div class="aspect-[16/9] md:aspect-[21/9] gradient-1 relative overflow-hidden">
+                            <div class="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors duration-500"></div>
+                            <div class="absolute inset-0 flex items-center justify-center">
+                                <span class="text-6xl md:text-8xl font-display font-bold text-white/20 select-none">01</span>
+                            </div>
+                        </div>
+                        <div class="absolute bottom-0 left-0 right-0 p-8 md:p-12">
+                            <h3 class="text-3xl md:text-4xl font-display font-bold mb-2">Neon Horizons</h3>
+                            <p class="text-neutral-300 text-lg">Immersive WebGL Experience</p>
+                        </div>
+                        <div class="card-overlay absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex items-end p-8 md:p-12">
+                            <div>
+                                <p class="text-white/80 mb-4 max-w-md">A cinematic journey through procedurally generated landscapes with real-time audio reactivity.</p>
+                                <span class="inline-flex items-center gap-2 text-white font-medium">
+                                    View Project 
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card 2 - Slides from Right -->
+            <div class="conveyor-card-right relative px-6">
+                <div class="max-w-6xl mx-auto flex justify-end">
+                    <div class="project-card group relative bg-neutral-800 rounded-3xl overflow-hidden cursor-pointer hover-target w-full md:w-4/5">
+                        <div class="aspect-[16/9] md:aspect-[21/9] gradient-2 relative overflow-hidden">
+                            <div class="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors duration-500"></div>
+                            <div class="absolute inset-0 flex items-center justify-center">
+                                <span class="text-6xl md:text-8xl font-display font-bold text-white/20 select-none">02</span>
+                            </div>
+                        </div>
+                        <div class="absolute bottom-0 left-0 right-0 p-8 md:p-12">
+                            <h3 class="text-3xl md:text-4xl font-display font-bold mb-2">Digital Flux</h3>
+                            <p class="text-neutral-300 text-lg">Interactive Data Visualization</p>
+                        </div>
+                        <div class="card-overlay absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex items-end p-8 md:p-12">
+                            <div>
+                                <p class="text-white/80 mb-4 max-w-md">Real-time data streams transformed into living, breathing visual organisms.</p>
+                                <span class="inline-flex items-center gap-2 text-white font-medium">
+                                    View Project 
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card 3 - Slides from Left -->
+            <div class="conveyor-card-left relative px-6">
+                <div class="max-w-6xl mx-auto">
+                    <div class="project-card group relative bg-neutral-800 rounded-3xl overflow-hidden cursor-pointer hover-target">
+                        <div class="aspect-[16/9] md:aspect-[21/9] gradient-3 relative overflow-hidden">
+                            <div class="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors duration-500"></div>
+                            <div class="absolute inset-0 flex items-center justify-center">
+                                <span class="text-6xl md:text-8xl font-display font-bold text-white/20 select-none">03</span>
+                            </div>
+                        </div>
+                        <div class="absolute bottom-0 left-0 right-0 p-8 md:p-12">
+                            <h3 class="text-3xl md:text-4xl font-display font-bold mb-2">Aether Space</h3>
+                            <p class="text-neutral-300 text-lg">3D Product Configurator</p>
+                        </div>
+                        <div class="card-overlay absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex items-end p-8 md:p-12">
+                            <div>
+                                <p class="text-white/80 mb-4 max-w-md">Photorealistic 3D rendering with dynamic lighting and material customization.</p>
+                                <span class="inline-flex items-center gap-2 text-white font-medium">
+                                    View Project 
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card 4 - Slides from Right -->
+            <div class="conveyor-card-right relative px-6">
+                <div class="max-w-6xl mx-auto flex justify-end">
+                    <div class="project-card group relative bg-neutral-800 rounded-3xl overflow-hidden cursor-pointer hover-target w-full md:w-4/5">
+                        <div class="aspect-[16/9] md:aspect-[21/9] gradient-4 relative overflow-hidden">
+                            <div class="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors duration-500"></div>
+                            <div class="absolute inset-0 flex items-center justify-center">
+                                <span class="text-6xl md:text-8xl font-display font-bold text-white/20 select-none">04</span>
+                            </div>
+                        </div>
+                        <div class="absolute bottom-0 left-0 right-0 p-8 md:p-12">
+                            <h3 class="text-3xl md:text-4xl font-display font-bold mb-2">Echo Chamber</h3>
+                            <p class="text-neutral-300 text-lg">Spatial Audio Interface</p>
+                        </div>
+                        <div class="card-overlay absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex items-end p-8 md:p-12">
+                            <div>
+                                <p class="text-white/80 mb-4 max-w-md">Web-based spatial audio mixing environment with binaural rendering.</p>
+                                <span class="inline-flex items-center gap-2 text-white font-medium">
+                                    View Project 
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </section>
-  </main>
 
-  <script>
-    // 1. Initialize Lenis for cinematic smooth scrolling
-    const lenis = new Lenis({
-      duration: 1.2,
-      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-      orientation: 'vertical',
-      gestureOrientation: 'vertical',
-      smoothWheel: true,
-    });
+    <!-- Horizontal Scroll Section - Conveyor Belt -->
+    <section class="horizontal-section bg-black" id="horizontal">
+        <div class="sticky top-0 h-screen flex items-center overflow-hidden">
+            <div class="absolute top-8 left-8 z-20">
+                <h2 class="font-display text-4xl md:text-6xl font-bold mb-2">Process</h2>
+                <p class="text-neutral-400 text-sm tracking-widest">SCROLL TO EXPLORE →</p>
+            </div>
+            
+            <div class="horizontal-track absolute left-0 flex items-center gap-8 md:gap-16 px-8 md:px-20">
+                <!-- Process Cards -->
+                <div class="process-card flex-shrink-0 w-[80vw] md:w-[40vw] h-[60vh] bg-neutral-900 rounded-3xl p-8 md:p-12 flex flex-col justify-between border border-neutral-800 hover-target">
+                    <div class="text-6xl md:text-8xl font-display font-bold text-neutral-800">01</div>
+                    <div>
+                        <h3 class="text-2xl md:text-4xl font-display font-bold mb-4">Discovery</h3>
+                        <p class="text-neutral-400 text-lg leading-relaxed">Deep dive into user needs, market analysis, and strategic positioning to define the project foundation.</p>
+                    </div>
+                </div>
 
-    // Sync Lenis with GSAP ScrollTrigger
-    lenis.on('scroll', ScrollTrigger.update);
-    gsap.ticker.add((time) => lenis.raf(time * 1000));
-    gsap.ticker.lagSmoothing(0);
+                <div class="process-card flex-shrink-0 w-[80vw] md:w-[40vw] h-[60vh] bg-neutral-900 rounded-3xl p-8 md:p-12 flex flex-col justify-between border border-neutral-800 hover-target">
+                    <div class="text-6xl md:text-8xl font-display font-bold text-neutral-800">02</div>
+                    <div>
+                        <h3 class="text-2xl md:text-4xl font-display font-bold mb-4">Concept</h3>
+                        <p class="text-neutral-400 text-lg leading-relaxed">Ideation workshops, wireframing, and prototyping to visualize the user journey and core interactions.</p>
+                    </div>
+                </div>
 
-    // 2. Register GSAP Plugin
-    gsap.registerPlugin(ScrollTrigger);
+                <div class="process-card flex-shrink-0 w-[80vw] md:w-[40vw] h-[60vh] bg-neutral-900 rounded-3xl p-8 md:p-12 flex flex-col justify-between border border-neutral-800 hover-target">
+                    <div class="text-6xl md:text-8xl font-display font-bold text-neutral-800">03</div>
+                    <div>
+                        <h3 class="text-2xl md:text-4xl font-display font-bold mb-4">Design</h3>
+                        <p class="text-neutral-400 text-lg leading-relaxed">Visual identity, UI components, and motion design systems crafted with pixel-perfect precision.</p>
+                    </div>
+                </div>
 
-    // 3. Conveyor Belt: Horizontal movement controlled by vertical scroll
-    const conveyor = document.querySelector('.conveyor-section');
-    const track = document.querySelector('.conveyor-track');
+                <div class="process-card flex-shrink-0 w-[80vw] md:w-[40vw] h-[60vh] bg-neutral-900 rounded-3xl p-8 md:p-12 flex flex-col justify-between border border-neutral-800 hover-target">
+                    <div class="text-6xl md:text-8xl font-display font-bold text-neutral-800">04</div>
+                    <div>
+                        <h3 class="text-2xl md:text-4xl font-display font-bold mb-4">Develop</h3>
+                        <p class="text-neutral-400 text-lg leading-relaxed">Clean code architecture, performance optimization, and seamless animation implementation.</p>
+                    </div>
+                </div>
 
-    gsap.to(track, {
-      x: () => -(track.scrollWidth - window.innerWidth),
-      ease: "none",
-      scrollTrigger: {
-        trigger: conveyor,
-        start: "top top",
-        end: () => `+=${track.scrollWidth - window.innerWidth}`,
-        pin: true,
-        scrub: 1.2, // Cinematic inertia
-        invalidateOnRefresh: true // Recalculate on resize
-      }
-    });
+                <div class="process-card flex-shrink-0 w-[80vw] md:w-[40vw] h-[60vh] bg-neutral-900 rounded-3xl p-8 md:p-12 flex flex-col justify-between border border-neutral-800 hover-target">
+                    <div class="text-6xl md:text-8xl font-display font-bold text-neutral-800">05</div>
+                    <div>
+                        <h3 class="text-2xl md:text-4xl font-display font-bold mb-4">Deploy</h3>
+                        <p class="text-neutral-400 text-lg leading-relaxed">Launch strategy, analytics integration, and continuous iteration based on real user data.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
 
-    // 4. Side-Sliding Cards: Alternating directions, fully reversible
-    const cards = document.querySelectorAll('.card-wrapper');
-    cards.forEach((wrapper, i) => {
-      // Alternate starting direction: even from left, odd from right
-      const startDir = i % 2 === 0 ? "-100vw" : "100vw";
-      const endDir = i % 2 === 0 ? "100vw" : "-100vw";
+    <!-- Parallax Grid Section -->
+    <section class="relative py-32 bg-neutral-900 overflow-hidden" id="about">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-24 items-center mb-24">
+                <div class="parallax-text-left">
+                    <h2 class="font-display text-5xl md:text-7xl font-bold mb-6 leading-tight">Crafting Digital Experiences</h2>
+                    <div class="w-24 h-1 bg-gradient-to-r from-purple-500 to-pink-500 mb-8"></div>
+                    <p class="text-neutral-400 text-lg leading-relaxed mb-6">
+                        With over a decade of experience in interactive design and frontend development, I specialize in creating scroll-driven narratives that captivate and engage.
+                    </p>
+                    <p class="text-neutral-400 text-lg leading-relaxed">
+                        Every pixel is purposeful. Every animation tells a story. Every scroll reveals something new.
+                    </p>
+                </div>
+                <div class="parallax-image-right relative">
+                    <div class="aspect-square rounded-3xl gradient-1 opacity-80"></div>
+                    <div class="absolute -bottom-6 -right-6 w-48 h-48 rounded-2xl gradient-2 opacity-60 parallax-float"></div>
+                    <div class="absolute -top-6 -left-6 w-32 h-32 rounded-full gradient-3 opacity-40 parallax-float-reverse"></div>
+                </div>
+            </div>
 
-      gsap.set(wrapper, { x: startDir });
-      
-      gsap.to(wrapper, {
-        x: endDir,
-        ease: "power3.inOut",
-        scrollTrigger: {
-          trigger: wrapper,
-          start: "top 85%",
-          end: "bottom 15%",
-          scrub: 1.2
+            <!-- Stats with scroll animation -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-8 mt-24">
+                <div class="stat-item text-center p-6 border border-neutral-800 rounded-2xl hover-target">
+                    <div class="stat-number font-display text-4xl md:text-6xl font-bold mb-2" data-value="150">0</div>
+                    <div class="text-neutral-500 text-sm tracking-widest uppercase">Projects</div>
+                </div>
+                <div class="stat-item text-center p-6 border border-neutral-800 rounded-2xl hover-target">
+                    <div class="stat-number font-display text-4xl md:text-6xl font-bold mb-2" data-value="12">0</div>
+                    <div class="text-neutral-500 text-sm tracking-widest uppercase">Years Exp</div>
+                </div>
+                <div class="stat-item text-center p-6 border border-neutral-800 rounded-2xl hover-target">
+                    <div class="stat-number font-display text-4xl md:text-6xl font-bold mb-2" data-value="85">0</div>
+                    <div class="text-neutral-500 text-sm tracking-widest uppercase">Clients</div>
+                </div>
+                <div class="stat-item text-center p-6 border border-neutral-800 rounded-2xl hover-target">
+                    <div class="stat-number font-display text-4xl md:text-6xl font-bold mb-2" data-value="24">0</div>
+                    <div class="text-neutral-500 text-sm tracking-widest uppercase">Awards</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section class="relative min-h-screen flex items-center justify-center bg-black overflow-hidden" id="contact">
+        <div class="absolute inset-0 z-0">
+            <div class="absolute inset-0 bg-gradient-to-t from-purple-900/30 via-transparent to-transparent"></div>
+        </div>
+        
+        <div class="relative z-10 text-center px-6 max-w-4xl mx-auto">
+            <h2 class="contact-title font-display text-5xl md:text-8xl font-bold mb-8 leading-tight">
+                Let's Create<br>
+                <span class="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-600">Together</span>
+            </h2>
+            <p class="contact-subtitle text-xl md:text-2xl text-neutral-400 mb-12 max-w-2xl mx-auto">
+                Ready to bring your vision to life with cinematic scroll experiences?
+            </p>
+            
+            <a href="mailto:hello@portfolio.com" class="contact-cta inline-flex items-center gap-4 px-8 py-4 bg-white text-black rounded-full font-medium text-lg hover-target transition-transform hover:scale-105 active:scale-95">
+                <span>Start a Project</span>
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
+            </a>
+
+            <div class="mt-24 pt-12 border-t border-neutral-800 flex flex-col md:flex-row justify-between items-center gap-6 text-neutral-500 text-sm">
+                <p>&copy; 2024 Portfolio. All rights reserved.</p>
+                <div class="flex gap-6">
+                    <a href="#" class="hover:text-white transition-colors hover-target">Twitter</a>
+                    <a href="#" class="hover:text-white transition-colors hover-target">LinkedIn</a>
+                    <a href="#" class="hover:text-white transition-colors hover-target">GitHub</a>
+                    <a href="#" class="hover:text-white transition-colors hover-target">Dribbble</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        // Initialize Lenis Smooth Scroll
+        const lenis = new Lenis({
+            duration: 1.2,
+            easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+            direction: 'vertical',
+            gestureDirection: 'vertical',
+            smooth: true,
+            smoothTouch: false,
+            touchMultiplier: 2
+        });
+
+        // Sync Lenis with GSAP ScrollTrigger
+        lenis.on('scroll', ScrollTrigger.update);
+
+        gsap.ticker.add((time) => {
+            lenis.raf(time * 1000);
+        });
+
+        gsap.ticker.lagSmoothing(0);
+
+        // Register ScrollTrigger
+        gsap.registerPlugin(ScrollTrigger);
+
+        // Custom Cursor
+        const cursorDot = document.querySelector('.cursor-dot');
+        const cursorOutline = document.querySelector('.cursor-outline');
+        const hoverTargets = document.querySelectorAll('.hover-target');
+
+        let mouseX = 0, mouseY = 0;
+        let outlineX = 0, outlineY = 0;
+
+        window.addEventListener('mousemove', (e) => {
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+            
+            cursorDot.style.left = mouseX + 'px';
+            cursorDot.style.top = mouseY + 'px';
+        });
+
+        function animateCursor() {
+            outlineX += (mouseX - outlineX) * 0.15;
+            outlineY += (mouseY - outlineY) * 0.15;
+            
+            cursorOutline.style.left = outlineX + 'px';
+            cursorOutline.style.top = outlineY + 'px';
+            
+            requestAnimationFrame(animateCursor);
         }
-      });
-    });
+        animateCursor();
 
-    // 5. Parallax Elements: Background/foreground depth
-    const heroTitle = document.querySelector('.hero-title');
-    gsap.to(heroTitle, {
-      y: 150,
-      scale: 0.9,
-      opacity: 0.3,
-      ease: "none",
-      scrollTrigger: {
-        trigger: ".hero",
-        start: "top top",
-        end: "bottom top",
-        scrub: 1.2
-      }
-    });
+        hoverTargets.forEach(target => {
+            target.addEventListener('mouseenter', () => cursorOutline.classList.add('hover'));
+            target.addEventListener('mouseleave', () => cursorOutline.classList.remove('hover'));
+        });
 
-    // Subtle floating effect for conveyor items
-    document.querySelectorAll('.conveyor-item').forEach((item, i) => {
-      gsap.to(item, {
-        y: () => (i % 2 === 0 ? 20 : -20),
-        duration: 3,
-        repeat: -1,
-        yoyo: true,
-        ease: "sine.inOut"
-      });
-    });
+        // Hero Animations
+        gsap.from('.hero-line', {
+            y: 100,
+            opacity: 0,
+            duration: 1.2,
+            stagger: 0.2,
+            ease: "power4.out",
+            delay: 0.5
+        });
 
-    // 6. Cleanup on resize (optional but recommended for performance)
-    window.addEventListener('resize', () => {
-      ScrollTrigger.refresh();
-    });
-  </script>
+        gsap.to('.hero-subtitle', {
+            opacity: 1,
+            y: 0,
+            duration: 1,
+            ease: "power2.out",
+            delay: 1
+        });
+
+        // Conveyor Belt Cards - Slide from sides with scrub
+        // Card 1 - From Left
+        gsap.fromTo('.conveyor-card-left:nth-of-type(1) .project-card', 
+            { x: '-100vw', rotation: -5, opacity: 0.5 },
+            {
+                x: 0,
+                rotation: 0,
+                opacity: 1,
+                ease: "none",
+                scrollTrigger: {
+                    trigger: '.conveyor-card-left:nth-of-type(1)',
+                    start: "top 80%",
+                    end: "top 20%",
+                    scrub: 1,
+                    invalidateOnRefresh: true
+                }
+            }
+        );
+
+        // Card 2 - From Right
+        gsap.fromTo('.conveyor-card-right:nth-of-type(1) .project-card', 
+            { x: '100vw', rotation: 5, opacity: 0.5 },
+            {
+                x: 0,
+                rotation: 0,
+                opacity: 1,
+                ease: "none",
+                scrollTrigger: {
+                    trigger: '.conveyor-card-right:nth-of-type(1)',
+                    start: "top 80%",
+                    end: "top 20%",
+                    scrub: 1,
+                    invalidateOnRefresh: true
+                }
+            }
+        );
+
+        // Card 3 - From Left
+        gsap.fromTo('.conveyor-card-left:nth-of-type(2) .project-card', 
+            { x: '-100vw', rotation: -5, opacity: 0.5 },
+            {
+                x: 0,
+                rotation: 0,
+                opacity: 1,
+                ease: "none",
+                scrollTrigger: {
+                    trigger: '.conveyor-card-left:nth-of-type(2)',
+                    start: "top 80%",
+                    end: "top 20%",
+                    scrub: 1,
+                    invalidateOnRefresh: true
+                }
+            }
+        );
+
+        // Card 4 - From Right
+        gsap.fromTo('.conveyor-card-right:nth-of-type(2) .project-card', 
+            { x: '100vw', rotation: 5, opacity: 0.5 },
+            {
+                x: 0,
+                rotation: 0,
+                opacity: 1,
+                ease: "none",
+                scrollTrigger: {
+                    trigger: '.conveyor-card-right:nth-of-type(2)',
+                    start: "top 80%",
+                    end: "top 20%",
+                    scrub: 1,
+                    invalidateOnRefresh: true
+                }
+            }
+        );
+
+        // Horizontal Scroll Section - Conveyor Belt Effect
+        const horizontalSection = document.querySelector('.horizontal-section');
+        const horizontalTrack = document.querySelector('.horizontal-track');
+        
+        if (horizontalSection && horizontalTrack) {
+            const scrollWidth = horizontalTrack.scrollWidth - window.innerWidth;
+
+            gsap.to(horizontalTrack, {
+                x: -scrollWidth,
+                ease: "none",
+                scrollTrigger: {
+                    trigger: horizontalSection,
+                    start: "top top",
+                    end: () => `+=${scrollWidth}`,
+                    scrub: 1,
+                    pin: true,
+                    anticipatePin: 1,
+                    invalidateOnRefresh: true
+                }
+            });
+
+            // Animate individual cards during horizontal scroll
+            const processCards = document.querySelectorAll('.process-card');
+            processCards.forEach((card, index) => {
+                gsap.fromTo(card, 
+                    { 
+                        scale: 0.8, 
+                        opacity: 0.3,
+                        y: 50
+                    },
+                    {
+                        scale: 1,
+                        opacity: 1,
+                        y: 0,
+                        ease: "none",
+                        scrollTrigger: {
+                            trigger: horizontalSection,
+                            start: "top top",
+                            end: () => `+=${scrollWidth}`,
+                            scrub: 1,
+                            invalidateOnRefresh: true
+                        }
+                    }
+                );
+            });
+        }
+
+        // Parallax Text and Image
+        gsap.fromTo('.parallax-text-left', 
+            { x: -100, opacity: 0 },
+            {
+                x: 0,
+                opacity: 1,
+                ease: "none",
+                scrollTrigger: {
+                    trigger: '.parallax-text-left',
+                    start: "top 80%",
+                    end: "top 40%",
+                    scrub: 1
+                }
+            }
+        );
+
+        gsap.fromTo('.parallax-image-right', 
+            { x: 100, opacity: 0, scale: 0.9 },
+            {
+                x: 0,
+                opacity: 1,
+                scale: 1,
+                ease: "none",
+                scrollTrigger: {
+                    trigger: '.parallax-image-right',
+                    start: "top 80%",
+                    end: "top 40%",
+                    scrub: 1
+                }
+            }
+        );
+
+        // Floating elements parallax
+        gsap.to('.parallax-float', {
+            y: -100,
+            ease: "none",
+            scrollTrigger: {
+                trigger: '#about',
+                start: "top bottom",
+                end: "bottom top",
+                scrub: 1
+            }
+        });
+
+        gsap.to('.parallax-float-reverse', {
+            y: 100,
+            ease: "none",
+            scrollTrigger: {
+                trigger: '#about',
+                start: "top bottom",
+                end: "bottom top",
+                scrub: 1
+            }
+        });
+
+        // Stats Counter Animation
+        const statNumbers = document.querySelectorAll('.stat-number');
+        
+        statNumbers.forEach(stat => {
+            const value = parseInt(stat.getAttribute('data-value'));
+            
+            ScrollTrigger.create({
+                trigger: stat,
+                start: "top 80%",
+                onEnter: () => {
+                    gsap.to(stat, {
+                        innerText: value,
+                        duration: 2,
+                        snap: { innerText: 1 },
+                        ease: "power2.out",
+                        onUpdate: function() {
+                            stat.innerText = Math.round(this.targets()[0].innerText) + '+';
+                        }
+                    });
+                },
+                once: true
+            });
+        });
+
+        // Contact Section Animations
+        gsap.from('.contact-title', {
+            y: 100,
+            opacity: 0,
+            duration: 1,
+            ease: "power4.out",
+            scrollTrigger: {
+                trigger: '#contact',
+                start: "top 60%",
+                toggleActions: "play none none reverse"
+            }
+        });
+
+        gsap.from('.contact-subtitle', {
+            y: 50,
+            opacity: 0,
+            duration: 1,
+            delay: 0.2,
+            ease: "power4.out",
+            scrollTrigger: {
+                trigger: '#contact',
+                start: "top 60%",
+                toggleActions: "play none none reverse"
+            }
+        });
+
+        gsap.from('.contact-cta', {
+            y: 30,
+            opacity: 0,
+            duration: 1,
+            delay: 0.4,
+            ease: "power4.out",
+            scrollTrigger: {
+                trigger: '#contact',
+                start: "top 60%",
+                toggleActions: "play none none reverse"
+            }
+        });
+
+        // Section Title Animation
+        gsap.from('.section-title', {
+            y: 50,
+            opacity: 0,
+            duration: 1,
+            ease: "power4.out",
+            scrollTrigger: {
+                trigger: '.section-title',
+                start: "top 80%",
+                toggleActions: "play none none reverse"
+            }
+        });
+
+        // Refresh ScrollTrigger on window resize
+        let resizeTimer;
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(() => {
+                ScrollTrigger.refresh();
+            }, 250);
+        });
+
+        // Smooth scroll to anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    lenis.scrollTo(target, { offset: 0, duration: 1.5 });
+                }
+            });
+        });
+
+        // Prefers reduced motion
+        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+            lenis.destroy();
+            ScrollTrigger.getAll().forEach(trigger => trigger.kill());
+        }
+    </script>
 </body>
 </html>
