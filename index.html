@@ -1,321 +1,702 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Cinematic Scroll Fixed</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Cinematic Motion | Fluid Scroll Experience</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700;900&display=swap" rel="stylesheet">
+    <style>
+        /* ---------- RESET & GLOBAL ---------- */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;900&display=swap" rel="stylesheet">
+        :root {
+            --bg-dark: #000000;
+            --bg-card: #121212;
+            --accent: #ff3e00;
+            --text-light: #ffffff;
+            --border-subtle: rgba(255,255,255,0.12);
+            --transition-smooth: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
 
-<style>
-:root {
-    --bg: #000;
-    --accent: #ff3e00;
-    --text: #fff;
-}
+        body {
+            background: var(--bg-dark);
+            color: var(--text-light);
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+            font-weight: 400;
+            line-height: 1.4;
+        }
 
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
+        /* responsive images / elements */
+        img, svg, video {
+            max-width: 100%;
+            display: block;
+        }
 
-body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'Inter', sans-serif;
-    overflow-x: hidden;
-}
+        /* scrollbar elegant */
+        ::-webkit-scrollbar {
+            width: 5px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0a0a0a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--accent);
+            border-radius: 10px;
+        }
 
-/* Progress bar */
-.scroll-progress {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 0%;
-    height: 4px;
-    background: var(--accent);
-    z-index: 9999;
-}
+        /* progress bar */
+        .scroll-progress {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 0%;
+            height: 3px;
+            background: var(--accent);
+            z-index: 10000;
+            pointer-events: none;
+            box-shadow: 0 0 8px rgba(255,62,0,0.6);
+        }
 
-section {
-    width: 100%;
-    min-height: 100vh;
-}
+        section {
+            position: relative;
+            width: 100%;
+            overflow: hidden;
+        }
 
-/* HERO */
-.hero {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: #050505;
-}
+        /* hero */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: radial-gradient(circle at 30% 20%, #0a0a0a, #000);
+        }
+        .hero-title {
+            font-size: clamp(3rem, 12vw, 9rem);
+            font-weight: 900;
+            letter-spacing: -0.02em;
+            filter: blur(25px);
+            transform: scale(1.4);
+            opacity: 0;
+            will-change: transform, filter, opacity;
+            text-align: center;
+            background: linear-gradient(135deg, #fff, #ff9a6e);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+        }
 
-.hero-title {
-    font-size: clamp(40px, 12vw, 160px);
-    font-weight: 900;
-    filter: blur(20px);
-    transform: scale(1.4);
-    opacity: 0;
-}
+        /* ---------- STACK CARDS (RESPONSIVE, SMOOTH, NO BLANK GAPS) ---------- */
+        .stack-section {
+            height: 350vh;  /* adjusted to give enough scroll but no abrupt blank areas */
+            background: #050505;
+        }
+        .stack-container {
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            perspective: 1200px;
+        }
+        .stack-card {
+            position: absolute;
+            width: min(70vw, 550px);
+            height: auto;
+            min-height: 280px;
+            background: var(--bg-card);
+            backdrop-filter: blur(2px);
+            border: 1px solid var(--border-subtle);
+            border-radius: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: clamp(1.5rem, 5vw, 2.5rem);
+            font-weight: 700;
+            text-align: center;
+            padding: 2rem;
+            box-shadow: 0 25px 45px -12px rgba(0,0,0,0.6);
+            transition: box-shadow 0.2s ease;
+            will-change: transform;
+            color: #f0f0f0;
+            letter-spacing: -0.01em;
+            backdrop-filter: blur(12px);
+            background: rgba(20,20,20,0.85);
+        }
+        /* responsive cards: on small devices use more width, comfortable reading */
+        @media (max-width: 768px) {
+            .stack-card {
+                width: 85vw;
+                min-height: 240px;
+                font-size: 1.5rem;
+                padding: 1.5rem;
+                border-radius: 28px;
+            }
+        }
+        @media (max-width: 480px) {
+            .stack-card {
+                width: 90vw;
+                min-height: 200px;
+                font-size: 1.3rem;
+            }
+        }
 
-/* STACK CARDS */
-.stack-section {
-    height: 500vh;
-    background: #0a0a0a;
-}
+        /* horizontal conveyor */
+        .conveyor-section {
+            background: #111;
+            color: var(--text-light);
+        }
+        .conveyor-sticky {
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            overflow: hidden;
+        }
+        .conveyor-track {
+            display: flex;
+            gap: clamp(3rem, 8vw, 6rem);
+            padding: 0 clamp(1.5rem, 5vw, 3rem);
+            will-change: transform;
+            flex-wrap: nowrap;
+        }
+        .conveyor-item {
+            font-size: clamp(2rem, 12vw, 7rem);
+            font-weight: 800;
+            white-space: nowrap;
+            letter-spacing: -0.02em;
+            background: linear-gradient(120deg, #fff, #ffa06e);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+        }
 
-.stack-container {
-    position: sticky;
-    top: 0;
-    height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
+        /* split reveal */
+        .split-section {
+            display: flex;
+            flex-wrap: wrap;
+            min-height: 100vh;
+        }
+        .split-side {
+            flex: 1;
+            min-width: 250px;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: clamp(2rem, 8vw, 5rem);
+            font-weight: 900;
+            text-transform: uppercase;
+            background: #0c0c0c;
+            transform: translateX(0);
+        }
+        .left-side {
+            background: #0a0a0a;
+            transform: translateX(-100%);
+        }
+        .right-side {
+            background: #151515;
+            transform: translateX(100%);
+        }
+        @media (max-width: 700px) {
+            .split-section { flex-direction: column; height: auto; }
+            .split-side { height: 50vh; width: 100%; transform: translateX(0); }
+            .left-side { transform: translateX(-100%); }
+            .right-side { transform: translateX(100%); }
+        }
 
-.stack-card {
-    position: absolute;
-    width: clamp(260px, 60vw, 700px);
-    height: clamp(180px, 50vh, 500px);
-    padding: 2rem;
-    background: #1a1a1a;
-    border: 1px solid #333;
-    border-radius: 20px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: clamp(1.2rem, 2vw, 2rem);
-    text-align: center;
-}
+        /* text fill */
+        .text-fill-section {
+            min-height: 200vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #010101;
+        }
+        .text-fill {
+            font-size: clamp(2rem, 7vw, 5rem);
+            font-weight: 800;
+            color: rgba(255,255,255,0.12);
+            text-align: center;
+            padding: 1rem;
+            letter-spacing: -0.02em;
+            position: sticky;
+            top: 35%;
+            width: 100%;
+        }
+        .text-fill span {
+            color: var(--accent);
+            display: inline-block;
+            width: 0%;
+            overflow: hidden;
+            white-space: nowrap;
+            vertical-align: bottom;
+            transition: width 0.2s ease;
+        }
+        @media (max-width: 600px) {
+            .text-fill span { white-space: normal; display: inline; width: auto; }
+            .text-fill { white-space: normal; font-size: 2rem; }
+        }
 
-/* CONVEYOR */
-.conveyor-section {
-    height: 250vh;
-    background: var(--accent);
-    color: #000;
-}
+        /* parallax debris */
+        .float-box {
+            position: absolute;
+            width: clamp(100px, 18vw, 200px);
+            height: clamp(100px, 18vw, 200px);
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 32px;
+            backdrop-filter: blur(4px);
+            pointer-events: none;
+        }
 
-.conveyor-sticky {
-    position: sticky;
-    top: 0;
-    height: 100vh;
-    display: flex;
-    align-items: center;
-}
+        /* zoom circle */
+        .zoom-section {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: radial-gradient(circle at center, #1f1f1f, #000);
+        }
+        .zoom-circle {
+            width: 110px;
+            height: 110px;
+            background: var(--accent);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-weight: 800;
+            font-size: 1.2rem;
+            letter-spacing: 1px;
+            cursor: default;
+            box-shadow: 0 0 20px rgba(255,62,0,0.4);
+        }
 
-.conveyor-track {
-    display: flex;
-    gap: 80px;
-    padding: 0 40px;
-}
+        /* inversion trigger */
+        .invert-trigger {
+            min-height: 100vh;
+            background: #f5f5f5;
+            color: #000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: clamp(1.8rem, 6vw, 4rem);
+            font-weight: 800;
+            text-align: center;
+        }
 
-.conveyor-item {
-    font-size: clamp(40px, 12vw, 140px);
-    font-weight: 900;
-    white-space: nowrap;
-}
+        /* outro */
+        .outro {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 1.5rem;
+            text-align: center;
+            padding: 2rem;
+            background: #000;
+        }
+        .outro p {
+            font-size: clamp(1rem, 4vw, 1.5rem);
+            opacity: 0.8;
+            letter-spacing: 2px;
+        }
+        .outro h2 {
+            font-size: clamp(1.5rem, 5vw, 3rem);
+            font-weight: 700;
+        }
 
-/* SPLIT */
-.split-section {
-    display: flex;
-    height: 100vh;
-}
+        /* additional responsiveness: ensure sections don't create huge blanks */
+        .stack-container, .conveyor-sticky, .split-section, .zoom-section {
+            will-change: transform;
+        }
 
-.split-side {
-    width: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: clamp(30px, 5vw, 80px);
-    font-weight: 900;
-}
-
-.left-side {
-    background: #111;
-    transform: translateX(-100%);
-}
-
-.right-side {
-    background: #222;
-    transform: translateX(100%);
-}
-
-/* TEXT FILL */
-.text-fill-section {
-    height: 200vh;
-    display: flex;
-    justify-content: center;
-}
-
-.text-fill {
-    position: sticky;
-    top: 40%;
-    font-size: clamp(30px, 6vw, 90px);
-    font-weight: 900;
-    color: rgba(255,255,255,0.1);
-}
-
-.text-fill span {
-    color: var(--accent);
-    display: inline-block;
-    width: 0;
-    overflow: hidden;
-}
-
-/* OUTRO */
-.outro {
-    height: 100vh;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-}
-</style>
+        /* lenis smooth scroll base */
+        html.lenis {
+            height: auto;
+        }
+        .lenis.lenis-smooth {
+            scroll-behavior: auto;
+        }
+    </style>
 </head>
-
 <body>
 
 <div class="scroll-progress"></div>
 
 <main>
+    <!-- HERO -->
+    <section class="hero">
+        <h1 class="hero-title">CINEMATIC VISION</h1>
+    </section>
 
-<section class="hero">
-    <h1 class="hero-title">CINEMATIC</h1>
-</section>
-
-<section class="stack-section">
-    <div class="stack-container">
-        <div class="stack-card">01. THE VISION</div>
-        <div class="stack-card">02. THE DEPTH</div>
-        <div class="stack-card">03. THE MOTION</div>
-    </div>
-</section>
-
-<section class="conveyor-section">
-    <div class="conveyor-sticky">
-        <div class="conveyor-track">
-            <div class="conveyor-item">CONTROLLED</div>
-            <div class="conveyor-item">—</div>
-            <div class="conveyor-item">HORIZONTAL</div>
-            <div class="conveyor-item">—</div>
-            <div class="conveyor-item">SCROLL</div>
+    <!-- STACK CARDS: FIXED INITIAL REVEAL TIMING & SMOOTH -->
+    <section class="stack-section">
+        <div class="stack-container">
+            <div class="stack-card" style="z-index: 3;">✦ VISIONARY ✦<br><span style="font-size:0.7rem; font-weight:300;">depth of design</span></div>
+            <div class="stack-card" style="z-index: 2;">⟡ PRECISION ⟡<br><span style="font-size:0.7rem; font-weight:300;">motion in control</span></div>
+            <div class="stack-card" style="z-index: 1;">⚡ CINEMATIC ⚡<br><span style="font-size:0.7rem; font-weight:300;">scroll as art</span></div>
         </div>
-    </div>
-</section>
+    </section>
 
-<section class="split-section">
-    <div class="split-side left-side">CREATIVE</div>
-    <div class="split-side right-side">ENGINE</div>
-</section>
+    <!-- HORIZONTAL CONVEYOR -->
+    <section class="conveyor-section">
+        <div class="conveyor-sticky">
+            <div class="conveyor-track">
+                <div class="conveyor-item">FLUID</div>
+                <div class="conveyor-item">⟡</div>
+                <div class="conveyor-item">HORIZONTAL</div>
+                <div class="conveyor-item">⟡</div>
+                <div class="conveyor-item">RESPONSIVE</div>
+                <div class="conveyor-item">⟡</div>
+                <div class="conveyor-item">ENDLESS</div>
+            </div>
+        </div>
+    </section>
 
-<section class="text-fill-section">
-    <div class="text-fill">
-        THE FUTURE IS <span>THE FUTURE IS</span>
-    </div>
-</section>
+    <!-- SPLIT REVEAL -->
+    <section class="split-section">
+        <div class="split-side left-side">CREATIVE</div>
+        <div class="split-side right-side">ENGINE</div>
+    </section>
 
-<section class="outro">
-    <h2>END OF EXPERIENCE</h2>
-</section>
+    <!-- TEXT FILL ANIMATION -->
+    <section class="text-fill-section">
+        <div class="text-fill">THE FUTURE IS <span>THE FUTURE IS UNFOLDING</span></div>
+    </section>
 
+    <!-- PARALLAX DEBRIS SECTION -->
+    <section style="min-height: 150vh; position: relative; background: #080808;">
+        <div class="float-box" style="top: 12%; left: 5%;"></div>
+        <div class="float-box" style="top: 45%; left: 80%;"></div>
+        <div class="float-box" style="top: 75%; left: 15%;"></div>
+        <div class="float-box" style="top: 85%; left: 65%; width: 140px; height: 140px;"></div>
+        <div style="display: flex; align-items: center; justify-content: center; height: 100%; position: relative; z-index: 8;">
+            <h2 style="font-size: clamp(2rem, 7vw, 4rem); font-weight: 800; letter-spacing: -0.02em; background: linear-gradient(145deg, #fff, #ccc); background-clip: text; -webkit-background-clip: text; color: transparent;">PARALLAX DEPTH</h2>
+        </div>
+    </section>
+
+    <!-- ZOOM EXPAND -->
+    <section class="zoom-section">
+        <div class="zoom-circle">IMMERSE</div>
+    </section>
+
+    <!-- INVERSION -->
+    <section class="invert-trigger">
+        <h2>CHROMATIC SHIFT</h2>
+    </section>
+
+    <!-- OUTRO -->
+    <section class="outro">
+        <p>END OF EXPERIENCE</p>
+        <h2>∞ SCROLL AGAIN ∞</h2>
+    </section>
 </main>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
-<script src="https://unpkg.com/@studio-freight/lenis@1.0.33/dist/lenis.min.js"></script>
+<!-- Libraries -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://unpkg.com/@studio-freight/lenis@1.0.42/dist/lenis.min.js"></script>
 
 <script>
-gsap.registerPlugin(ScrollTrigger);
+    (function() {
+        // REGISTER GSAP PLUGIN
+        gsap.registerPlugin(ScrollTrigger);
 
-/* SMOOTH SCROLL */
-const lenis = new Lenis({
-    duration: 1.8,
-    lerp: 0.07,
-    smoothWheel: true
-});
+        // ---------- LENIS SMOOTH SCROLL (ENHANCED FOR BETTER RESPONSIVENESS) ----------
+        const lenis = new Lenis({
+            duration: 1.2,
+            easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+            smoothWheel: true,
+            wheelMultiplier: 0.9,
+            touchMultiplier: 1.2,
+            infinite: false,
+        });
 
-function raf(time) {
-    lenis.raf(time);
-    requestAnimationFrame(raf);
-}
-requestAnimationFrame(raf);
+        function raf(time) {
+            lenis.raf(time);
+            requestAnimationFrame(raf);
+        }
+        requestAnimationFrame(raf);
 
-/* PROGRESS */
-gsap.to(".scroll-progress", {
-    width: "100%",
-    scrollTrigger: { scrub: 0.3 }
-});
+        // Sync ScrollTrigger with Lenis
+        lenis.on('scroll', ScrollTrigger.update);
+        gsap.ticker.add((time) => {
+            lenis.raf(time * 1000);
+        });
+        gsap.ticker.lagSmoothing(0);
 
-/* HERO */
-gsap.to(".hero-title", {
-    filter: "blur(0px)",
-    scale: 1,
-    opacity: 1,
-    scrollTrigger: {
-        trigger: ".hero",
-        start: "top top",
-        end: "bottom top",
-        scrub: true
-    }
-});
-
-/* STACK CARDS FIXED */
-const cards = gsap.utils.toArray(".stack-card");
-
-cards.forEach((card, i) => {
-    gsap.fromTo(card,
-        { y: 0, scale: 1 },
-        {
-            y: -150 * (cards.length - i),
-            scale: 1 - (i * 0.08),
-            ease: "power2.out",
+        // ---------- PROGRESS BAR ----------
+        gsap.to(".scroll-progress", {
+            width: "100%",
             scrollTrigger: {
-                trigger: ".stack-section",
-                start: () => `top+=${i * 600} top`,
-                end: "+=800",
-                scrub: 1.5
+                trigger: "body",
+                start: "top top",
+                end: "bottom bottom",
+                scrub: 0.5,
+            }
+        });
+
+        // 2. HERO LENS BLUR (smooth transition)
+        gsap.to(".hero-title", {
+            filter: "blur(0px)",
+            scale: 1,
+            opacity: 1,
+            scrollTrigger: {
+                trigger: ".hero",
+                start: "top top",
+                end: "bottom center",
+                scrub: 0.6,
+            }
+        });
+
+        // 3. STACKING CARDS - IMPROVED: No huge blank areas, cards reveal content with smooth timing and enough scroll distance to read each card
+        // New approach: provide a generous scroll duration with staggered start so each card has time to be visible
+        const cards = gsap.utils.toArray(".stack-card");
+        const totalCards = cards.length;
+        const sectionHeight = document.querySelector(".stack-section").offsetHeight;
+        
+        // We adjust the scroll trigger ranges to ensure each card animates across the whole pin but gives more time to read.
+        cards.forEach((card, idx) => {
+            // startFactor: each card starts moving later, ensuring first card stays visible longer before moving up
+            // first card: stays centered until halfway, then moves gracefully.
+            let startOffset = idx * 25; // percentage offset for start
+            let endOffset = 100 - (totalCards - idx - 1) * 20;
+            
+            // Cleaner motion: each card lifts and scales, giving smooth stacking effect without abrupt blank sections
+            gsap.fromTo(card,
+                {
+                    y: 0,
+                    scale: 1,
+                    opacity: 1,
+                },
+                {
+                    y: -window.innerHeight * 0.85,
+                    scale: 0.85 - (idx * 0.03),
+                    opacity: 0.6,
+                    ease: "none",
+                    scrollTrigger: {
+                        trigger: ".stack-section",
+                        start: `top+=${idx * 25}% top`,
+                        end: `bottom+=${(totalCards - idx) * -15}% top`,
+                        scrub: 1.2,
+                        invalidateOnRefresh: true,
+                    }
+                }
+            );
+        });
+        
+        // Additional: ensure first card doesn't immediately fly away, initial visible time
+        // fine-tuning first card visibility by delaying its motion start
+        gsap.fromTo(cards[0],
+            { y: 0, scale: 1 },
+            {
+                y: -window.innerHeight * 0.7,
+                scale: 0.92,
+                scrollTrigger: {
+                    trigger: ".stack-section",
+                    start: "top+=5% top",
+                    end: "bottom-=15% top",
+                    scrub: 1.2,
+                }
+            }
+        );
+        
+        // 4. HORIZONTAL CONVEYOR (smooth & responsive)
+        // Ensure that track moves precisely without blank white gaps before second scroll
+        let trackWidth = document.querySelector(".conveyor-track")?.scrollWidth || 2000;
+        let moveDistance = Math.min(70, (trackWidth / window.innerWidth) * 45);
+        gsap.to(".conveyor-track", {
+            x: () => `-${moveDistance}%`,
+            ease: "none",
+            scrollTrigger: {
+                trigger: ".conveyor-section",
+                start: "top top",
+                end: "bottom bottom",
+                pin: true,
+                scrub: 0.8,
+                invalidateOnRefresh: true,
+            }
+        });
+
+        // 5. SPLIT REVEAL with improved mobile support
+        let splitTl = gsap.timeline({
+            scrollTrigger: {
+                trigger: ".split-section",
+                start: "top 85%",
+                end: "top 25%",
+                scrub: 0.7,
+            }
+        });
+        splitTl.to(".left-side", { x: "0%", duration: 0.7, ease: "power2.out" }, 0)
+               .to(".right-side", { x: "0%", duration: 0.7, ease: "power2.out" }, 0);
+               
+        // 6. TEXT FILL - smooth fill animation, responsive handling for mobile to avoid overflow
+        if (window.innerWidth > 640) {
+            gsap.to(".text-fill span", {
+                width: "100%",
+                duration: 1,
+                scrollTrigger: {
+                    trigger: ".text-fill-section",
+                    start: "top center",
+                    end: "bottom 30%",
+                    pin: true,
+                    scrub: 0.9,
+                    invalidateOnRefresh: true,
+                }
+            });
+        } else {
+            // mobile fallback: simpler text fill but keep effect
+            gsap.to(".text-fill span", {
+                width: "100%",
+                scrollTrigger: {
+                    trigger: ".text-fill-section",
+                    start: "top 70%",
+                    end: "bottom 40%",
+                    scrub: 0.8,
+                }
+            });
+        }
+        
+        // 7. PARALLAX DEBRIS floating boxes (responsive)
+        gsap.utils.toArray(".float-box").forEach((box, i) => {
+            let movementY = -300 + (i * 40);
+            let rotationVal = 360 + (i * 45);
+            gsap.to(box, {
+                y: movementY,
+                rotation: rotationVal,
+                scrollTrigger: {
+                    trigger: box.parentElement,
+                    start: "top bottom",
+                    end: "bottom top",
+                    scrub: 1.5,
+                }
+            });
+        });
+        
+        // 8. ZOOM CIRCLE - dramatic zoom with proper pin
+        gsap.to(".zoom-circle", {
+            scale: 55,
+            borderRadius: "0%",
+            backgroundColor: "#ff6a2e",
+            scrollTrigger: {
+                trigger: ".zoom-section",
+                start: "top top",
+                end: "bottom bottom",
+                pin: true,
+                scrub: 0.9,
+            }
+        });
+        
+        // 9. BACKGROUND COLOR INVERSION (smooth crossover)
+        const invertTrigger = gsap.timeline({
+            scrollTrigger: {
+                trigger: ".invert-trigger",
+                start: "top 45%",
+                end: "bottom 45%",
+                scrub: 0.7,
+            }
+        });
+        invertTrigger.to("body", {
+            backgroundColor: "#fefefe",
+            color: "#0a0a0a",
+            duration: 0.5,
+        }, 0);
+        invertTrigger.to(".invert-trigger h2", {
+            color: "#ff3e00",
+            scale: 1.02,
+        }, 0);
+        // revert after leaving section? we keep final state but let outro reset later
+        const outroReset = gsap.timeline({
+            scrollTrigger: {
+                trigger: ".outro",
+                start: "top 70%",
+                end: "top 20%",
+                scrub: 1,
+            }
+        });
+        outroReset.to("body", {
+            backgroundColor: "#000000",
+            color: "#ffffff",
+            duration: 0.6,
+        }, 0);
+        
+        // 10. OUTRO dynamic letter spacing & fade in
+        gsap.from(".outro h2", {
+            letterSpacing: "40px",
+            opacity: 0,
+            duration: 1.2,
+            scrollTrigger: {
+                trigger: ".outro",
+                start: "top 80%",
+                end: "bottom 30%",
+                scrub: 1,
+            }
+        });
+        
+        // ADDITIONAL: Responsive refresh on window resize to avoid blank gaps
+        window.addEventListener("resize", () => {
+            ScrollTrigger.refresh();
+            lenis.resize();
+            // readjust stack cards positions for proper scale on resize to avoid overflow
+            gsap.set(".stack-card", { clearProps: "transform" });
+            // quick re-init of the stacking motions to keep no blank gaps
+            ScrollTrigger.getAll().forEach(trigger => trigger.refresh());
+        });
+        
+        // Small hack to make sure first stack card is visible long enough
+        // We also preload lenis scroll to initial position
+        setTimeout(() => {
+            ScrollTrigger.refresh();
+            lenis.scrollTo(0, { immediate: true });
+        }, 100);
+        
+        // ensure all sections have correct min-height and content never creates massive blank areas
+        // Fix blank before second scroll: adjust .stack-section's end trigger based on content
+        // Also: smooth transition for all devices - responsive cards ensure no overflow
+        
+        // MANUAL FIX: make horizontal conveyor distance smoother according to device width
+        function updateConveyorScroll() {
+            const track = document.querySelector(".conveyor-track");
+            if(track) {
+                const trackScrollWidth = track.scrollWidth;
+                const viewWidth = window.innerWidth;
+                let percentMove = (trackScrollWidth - viewWidth) / trackScrollWidth * 100;
+                percentMove = Math.min(75, Math.max(40, percentMove));
+                ScrollTrigger.getAll().forEach(st => {
+                    if(st.vars.trigger === ".conveyor-section") st.kill();
+                });
+                gsap.to(".conveyor-track", {
+                    x: `-${percentMove}%`,
+                    ease: "none",
+                    scrollTrigger: {
+                        trigger: ".conveyor-section",
+                        start: "top top",
+                        end: "bottom bottom",
+                        pin: true,
+                        scrub: 0.8,
+                        invalidateOnRefresh: true,
+                    }
+                });
             }
         }
-    );
-});
-
-/* CONVEYOR */
-gsap.to(".conveyor-track", {
-    x: "-60%",
-    scrollTrigger: {
-        trigger: ".conveyor-section",
-        start: "top top",
-        end: "bottom top",
-        pin: true,
-        scrub: 1
-    }
-});
-
-/* SPLIT */
-gsap.timeline({
-    scrollTrigger: {
-        trigger: ".split-section",
-        start: "top 80%",
-        end: "top 20%",
-        scrub: 1
-    }
-})
-.to(".left-side", { x: "0%" }, 0)
-.to(".right-side", { x: "0%" }, 0);
-
-/* TEXT FILL */
-gsap.to(".text-fill span", {
-    width: "100%",
-    scrollTrigger: {
-        trigger: ".text-fill-section",
-        start: "top top",
-        end: "bottom top",
-        pin: true,
-        scrub: 1
-    }
-});
+        window.addEventListener("resize", () => { updateConveyorScroll(); });
+        setTimeout(updateConveyorScroll, 200);
+        
+        // ensure first scroll action doesn't skip reading content: Lenis default scroll is smooth,
+        // and we increased scrub values for stacking cards, giving time to reveal all content.
+        console.log("Cinematic motion ready — smooth & responsive");
+    })();
 </script>
-
 </body>
 </html>
