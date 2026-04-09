@@ -3,192 +3,219 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cinematic Motion Portfolio</title>
-    
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;900&display=swap" rel="stylesheet">
-
+    <title>Cinematic Scroll Experience</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;900&family=Playfair+Display:ital,wght@1,900&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg: #050505;
-            --card-bg: #111111;
-            --accent: #00ffcc;
+            --bg: #080808;
+            --accent: #e0ff00;
             --text: #ffffff;
+            --card-w: 45vw;
         }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            background-color: var(--bg);
-            color: var(--text);
-            font-family: 'Inter', sans-serif;
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            background: var(--bg); 
+            color: var(--text); 
+            font-family: 'Inter', sans-serif; 
             overflow-x: hidden;
-            line-height: 1.4;
         }
 
-        /* Smooth Scroll Setup */
-        html.lenis {
-            height: auto;
-        }
-        .lenis-smooth {
-            scroll-behavior: auto !important;
-        }
+        /* Smooth Scroll */
+        html.lenis { height: auto; }
+        .lenis-smooth { scroll-behavior: auto !important; }
 
+        /* Navigation */
         nav {
             position: fixed;
-            top: 0;
-            width: 100%;
-            padding: 30px;
-            z-index: 100;
+            top: 0; width: 100%;
+            padding: 40px;
+            z-index: 1000;
             display: flex;
             justify-content: space-between;
-            mix-blend-mode: difference;
-        }
-
-        .logo { font-weight: 900; letter-spacing: -1px; font-size: 1.2rem; }
-
-        /* Sections */
-        section {
-            position: relative;
-            width: 100%;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-        }
-
-        .hero {
-            align-items: center;
-            overflow: hidden;
-        }
-
-        .hero-title {
-            font-size: clamp(3rem, 12vw, 15rem);
-            font-weight: 900;
-            text-align: center;
-            line-height: 0.8;
+            font-size: 0.8rem;
+            letter-spacing: 2px;
             text-transform: uppercase;
         }
 
-        /* Interactive Project Cards */
-        .projects-container {
-            padding: 10vh 0;
-        }
-
-        .project-row {
-            width: 100%;
+        /* Hero Section */
+        .hero {
+            height: 150vh; /* Extra tall */
             display: flex;
-            padding: 10vh 5%;
+            align-items: center;
+            justify-content: center;
             perspective: 1000px;
         }
 
-        .project-card {
-            width: 45%;
-            aspect-ratio: 16/10;
-            background: var(--card-bg);
-            border: 1px solid #222;
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-end;
-            padding: 40px;
-            border-radius: 4px;
-            position: relative;
-            transition: border-color 0.4s ease;
-        }
-
-        .project-card:hover {
-            border-color: var(--accent);
-        }
-
-        .project-card h3 { font-size: 2rem; margin-bottom: 10px; }
-        .project-card p { color: #666; }
-
-        .row-right { justify-content: flex-end; }
-
-        /* Conveyor Belt / Marquee */
-        .conveyor-section {
-            background: var(--accent);
-            color: #000;
-            height: 60vh;
-            display: flex;
-            align-items: center;
-            overflow: hidden;
-        }
-
-        .conveyor-track {
-            display: flex;
-            white-space: nowrap;
-            gap: 50px;
-            will-change: transform;
-        }
-
-        .conveyor-track h2 {
+        .hero-title {
             font-size: 15vw;
             font-weight: 900;
-            text-transform: uppercase;
+            text-align: center;
+            line-height: 0.8;
+            z-index: 2;
         }
 
-        .footer-spacer {
+        .hero-sub {
+            position: absolute;
+            font-family: 'Playfair Display', serif;
+            font-style: italic;
+            font-size: 5vw;
+            color: var(--accent);
+            z-index: 3;
+            transform: translateY(100px);
+        }
+
+        /* Tall Content Sections */
+        .content-block {
+            position: relative;
+            padding: 40vh 0; /* Massive vertical spacing */
+        }
+
+        .parallax-bg-text {
+            position: absolute;
+            font-size: 25vw;
+            font-weight: 900;
+            color: rgba(255,255,255,0.03);
+            white-space: nowrap;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        /* Cinematic Cards */
+        .card-wrapper {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            margin: 20vh 0;
+        }
+
+        .card {
+            width: var(--card-w);
+            height: 65vh;
+            background: #111;
+            overflow: hidden;
+            position: relative;
+            border-radius: 8px;
+            box-shadow: 0 50px 100px rgba(0,0,0,0.5);
+        }
+
+        .card img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            filter: grayscale(1) brightness(0.5);
+            transition: 0.5s;
+        }
+
+        .card:hover img { filter: grayscale(0) brightness(0.8); }
+
+        .card-info {
+            position: absolute;
+            bottom: 40px;
+            left: 40px;
+        }
+
+        .card-info h3 { font-size: 3rem; font-weight: 900; }
+
+        /* Conveyor Section */
+        .conveyor-wrap {
             height: 100vh;
             display: flex;
             align-items: center;
-            justify-content: center;
+            overflow: hidden;
+            background: #fff;
+            color: #000;
         }
 
-        @media (max-width: 768px) {
-            .project-card { width: 90%; }
-            .project-row { justify-content: center !important; }
+        .conveyor-list {
+            display: flex;
+            gap: 100px;
+            font-size: 12vw;
+            font-weight: 900;
+            white-space: nowrap;
+            will-change: transform;
+        }
+
+        .footer {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+
+        .footer h2 { font-size: 5vw; max-width: 60%; margin-bottom: 2rem;}
+
+        /* Line decoration */
+        .scroll-line {
+            position: fixed;
+            left: 50%;
+            top: 0;
+            width: 1px;
+            height: 100%;
+            background: rgba(255,255,255,0.1);
+            z-index: -1;
         }
     </style>
 </head>
 <body>
 
     <nav>
-        <div class="logo">GENESIS.STUDIO</div>
-        <div>MENU</div>
+        <div>EST. 2026</div>
+        <div>CINEMATIC REEL</div>
+        <div>CONTACT</div>
     </nav>
+
+    <div class="scroll-line"></div>
 
     <main>
         <section class="hero">
-            <h1 class="hero-title">BEYOND<br><span style="color:var(--accent)">MOTION</span></h1>
+            <h1 class="hero-title">ULTRA<br>MOTION</h1>
+            <div class="hero-sub">Digital Director</div>
         </section>
 
-        <section class="projects-container">
-            <div class="project-row">
-                <div class="project-card" id="p1">
-                    <h3>NEBULA OS</h3>
-                    <p>Interface Design & Motion</p>
+        <section class="content-block">
+            <div class="parallax-bg-text">STORYTELLING</div>
+            
+            <div class="card-wrapper" style="justify-content: flex-start; padding-left: 10%;">
+                <div class="card" id="c1">
+                    <img src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=80&w=1000" alt="Work">
+                    <div class="card-info"><h3>01. VISION</h3></div>
                 </div>
             </div>
 
-            <div class="project-row row-right">
-                <div class="project-card" id="p2">
-                    <h3>CYBER ARCHIVE</h3>
-                    <p>Full Stack Development</p>
-                </div>
-            </div>
-
-            <div class="project-row">
-                <div class="project-card" id="p3">
-                    <h3>VOID ENGINE</h3>
-                    <p>3D WebGL Interaction</p>
+            <div class="card-wrapper" style="justify-content: flex-end; padding-right: 10%;">
+                <div class="card" id="c2">
+                    <img src="https://images.unsplash.com/photo-1633167606207-d840b5070fc2?auto=format&fit=crop&q=80&w=1000" alt="Work">
+                    <div class="card-info"><h3>02. DEPTH</h3></div>
                 </div>
             </div>
         </section>
 
-        <section class="conveyor-section">
-            <div class="conveyor-track">
-                <h2>CRAFTING THE FUTURE — CRAFTING THE FUTURE — </h2>
+        <section class="conveyor-wrap">
+            <div class="conveyor-list">
+                <span>REIMAGINE</span> <span>●</span> <span>RESTRUCTURE</span> <span>●</span> <span>RELEASE</span>
             </div>
         </section>
 
-        <section class="footer-spacer">
-            <h2 style="font-size: 3rem;">SCROLL UP TO REVERSE</h2>
+        <section class="content-block">
+             <div class="parallax-bg-text" style="color:var(--accent); opacity: 0.1;">INNOVATION</div>
+             <div class="card-wrapper">
+                <div class="card" id="c3" style="width: 70vw; height: 80vh;">
+                    <img src="https://images.unsplash.com/photo-1614850523296-d8c1af93d400?auto=format&fit=crop&q=80&w=1500" alt="Work">
+                    <div class="card-info"><h3>03. SCALE</h3></div>
+                </div>
+            </div>
         </section>
+
+        <footer class="footer">
+            <h2>Let's build the next dimension.</h2>
+            <p>© 2026 GENESIS STUDIO</p>
+        </footer>
     </main>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
@@ -196,13 +223,11 @@
     <script src="https://unpkg.com/@studio-freight/lenis@1.0.33/dist/lenis.min.js"></script>
 
     <script>
-        // Initialize Lenis for Inertial Smooth Scrolling
+        // 1. Heavy Smooth Scroll
         const lenis = new Lenis({
-            duration: 1.2,
+            duration: 2, // Slower, more cinematic feel
             easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-            orientation: 'vertical',
-            gestureOrientation: 'vertical',
-            smoothWheel: true,
+            wheelMultiplier: 0.8 // Heavier feel
         });
 
         function raf(time) {
@@ -211,88 +236,99 @@
         }
         requestAnimationFrame(raf);
 
-        // Link GSAP to Lenis
-        lenis.on('scroll', ScrollTrigger.update);
-        gsap.ticker.add((time) => {
-            lenis.raf(time * 1000);
-        });
-
-        // GSAP Animations
         gsap.registerPlugin(ScrollTrigger);
 
-        // 1. Hero Parallax
-        gsap.to(".hero-title", {
+        // 2. Hero 3D Reveal
+        const heroTl = gsap.timeline({
             scrollTrigger: {
                 trigger: ".hero",
                 start: "top top",
                 end: "bottom top",
                 scrub: true
-            },
-            y: 300,
-            scale: 0.7,
-            opacity: 0,
-            rotateX: 45
-        });
-
-        // 2. Card Slide Animations (The "Physical Connection")
-        const cards = document.querySelectorAll('.project-card');
-        
-        cards.forEach((card, index) => {
-            const direction = index % 2 === 0 ? -1 : 1; // Alternate sides
-            
-            // Timeline for entry AND exit
-            const tl = gsap.timeline({
-                scrollTrigger: {
-                    trigger: card,
-                    start: "top bottom", // Start as card enters bottom
-                    end: "bottom top",    // End as card leaves top
-                    scrub: 1,             // Connects movement directly to scroll
-                }
-            });
-
-            tl.fromTo(card, 
-                { 
-                    x: 400 * direction, 
-                    rotate: 15 * direction, 
-                    opacity: 0 
-                },
-                { 
-                    x: 0, 
-                    rotate: 0, 
-                    opacity: 1, 
-                    duration: 1 
-                }
-            )
-            .to(card, {
-                x: -400 * direction,
-                rotate: -15 * direction,
-                opacity: 0,
-                duration: 1
-            }, "+=0.5"); // Pause briefly in the center
-        });
-
-        // 3. Conveyor Belt Logic
-        gsap.to(".conveyor-track", {
-            x: "-30%", // Moves the text horizontally
-            scrollTrigger: {
-                trigger: ".conveyor-section",
-                start: "top bottom",
-                end: "bottom top",
-                scrub: 2 // Higher number = more "weight" or inertia
             }
         });
 
-        // 4. Background Color Shift
+        heroTl.to(".hero-title", { scale: 1.5, opacity: 0, rotateX: -20, y: -100 })
+              .to(".hero-sub", { y: -300, scale: 0.5, opacity: 0 }, 0);
+
+        // 3. Parallax Background Text
+        document.querySelectorAll('.parallax-bg-text').forEach(text => {
+            gsap.to(text, {
+                x: -500,
+                scrollTrigger: {
+                    trigger: text,
+                    start: "top bottom",
+                    end: "bottom top",
+                    scrub: 1
+                }
+            });
+        });
+
+        // 4. Advanced Card Interaction (3D Slide & Scale)
+        const animateCard = (id, xStart, xEnd) => {
+            gsap.fromTo(id, 
+                { x: xStart, opacity: 0, rotateY: xStart > 0 ? -30 : 30, scale: 0.8 },
+                { 
+                    x: 0, opacity: 1, rotateY: 0, scale: 1,
+                    scrollTrigger: {
+                        trigger: id,
+                        start: "top bottom",
+                        end: "top 20%",
+                        scrub: 1,
+                    }
+                }
+            );
+
+            // Exit animation
+            gsap.to(id, {
+                opacity: 0,
+                scale: 0.5,
+                y: -100,
+                scrollTrigger: {
+                    trigger: id,
+                    start: "bottom 40%",
+                    end: "bottom top",
+                    scrub: 1
+                }
+            });
+        };
+
+        animateCard("#c1", -500, 0);
+        animateCard("#c2", 500, 0);
+        animateCard("#c3", 0, 0); // Zoom only for center card
+
+        // 5. Conveyor Movement
+        gsap.to(".conveyor-list", {
+            x: "-50%",
+            scrollTrigger: {
+                trigger: ".conveyor-wrap",
+                start: "top bottom",
+                end: "bottom top",
+                scrub: 1
+            }
+        });
+
+        // 6. Global Background Shift
         gsap.to("body", {
             scrollTrigger: {
-                trigger: ".conveyor-section",
-                start: "top center",
-                end: "bottom center",
-                scrub: true,
-                toggleActions: "play reverse play reverse"
+                trigger: ".conveyor-wrap",
+                start: "top bottom",
+                end: "top top",
+                scrub: true
             },
-            backgroundColor: "#00ffcc",
-            duration: 1
+            backgroundColor: "#ffffff",
+            color: "#000"
+        });
+        
+        gsap.to("body", {
+            scrollTrigger: {
+                trigger: ".conveyor-wrap",
+                start: "bottom bottom",
+                end: "bottom top",
+                scrub: true
+            },
+            backgroundColor: "#080808",
+            color: "#fff"
         });
     </script>
 </body>
