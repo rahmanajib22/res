@@ -1,288 +1,332 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>The Director's Cut | Portfolio</title>
-    
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@900&family=Syncopate:wght@700&display=swap" rel="stylesheet">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cinematic Scroll Portfolio</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+  <script src="https://unpkg.com/lenis@1.1.18/dist/lenis.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --bg: #08080a;
+      --surface: #111114;
+      --surface-alt: #16161a;
+      --text: #f2f2f5;
+      --text-muted: #888890;
+      --accent: #5e47d9;
+      --accent-glow: rgba(94, 71, 217, 0.25);
+      --radius: 14px;
+      --ease-cinematic: cubic-bezier(0.22, 1, 0.36, 1);
+    }
 
-    <style>
-        :root {
-            --bg: #000;
-            --text: #fff;
-            --accent: #ff003c;
-        }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html.lenis, body { height: auto; overflow-x: hidden; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', system-ui, sans-serif;
+      line-height: 1.4;
+      -webkit-font-smoothing: antialiased;
+    }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { 
-            background: var(--bg); 
-            color: var(--text); 
-            font-family: 'Inter', sans-serif; 
-            overflow-x: hidden;
-        }
+    /* Layout Utilities */
+    .container { max-width: 1400px; margin: 0 auto; padding: 0 clamp(1.5rem, 5vw, 5rem); }
+    section { position: relative; min-height: 100vh; display: flex; flex-direction: column; justify-content: center; overflow: hidden; }
+    h2 { font-size: clamp(2.5rem, 6vw, 4.5rem); font-weight: 800; letter-spacing: -0.03em; line-height: 1; margin-bottom: 2rem; }
+    p { color: var(--text-muted); max-width: 60ch; font-size: clamp(1rem, 1.2vw, 1.25rem); }
 
-        /* 1. Cinematic Smooth Scroll */
-        html.lenis { height: auto; }
-        .lenis-smooth { scroll-behavior: auto !important; }
+    /* Card System (Scroll vs Hover Isolation) */
+    .card-wrap { will-change: transform; perspective: 1200px; }
+    .card {
+      background: var(--surface);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: var(--radius);
+      padding: clamp(1.5rem, 3vw, 2.5rem);
+      display: flex; flex-direction: column; gap: 1rem;
+      transition: transform 0.4s var(--ease-cinematic), box-shadow 0.4s var(--ease-cinematic), border-color 0.4s;
+      height: 100%;
+    }
+    .card:hover { transform: translateY(-6px) scale(1.015); box-shadow: 0 15px 35px rgba(0,0,0,0.5); border-color: var(--accent); }
+    .card-tag { background: rgba(94,71,217,0.15); color: var(--accent); padding: 0.35rem 0.9rem; border-radius: 99px; font-size: 0.75rem; font-weight: 600; width: fit-content; }
+    .card h3 { font-size: 1.4rem; font-weight: 700; }
 
-        /* 2. Hero: Zoom Reveal */
-        .hero {
-            height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-        }
-        .hero-title {
-            font-family: 'Syncopate', sans-serif;
-            font-size: 15vw;
-            letter-spacing: -0.05em;
-            text-transform: uppercase;
-        }
+    /* 1. Hero */
+    .hero { align-items: center; text-align: center; padding-top: 15vh; }
+    .hero-title { font-size: clamp(4rem, 14vw, 10rem); font-weight: 800; letter-spacing: -0.05em; line-height: 0.85; background: linear-gradient(to bottom right, #fff 0%, #666 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; will-change: transform, opacity; }
+    .scroll-indicator { position: absolute; bottom: 8vh; color: var(--text-muted); font-size: 0.8rem; letter-spacing: 0.1em; text-transform: uppercase; }
 
-        /* 3. The Stacking Section (Pinning Logic) */
-        .work-section {
-            position: relative;
-            background: #050505;
-        }
+    /* 2. Side Slide Cards */
+    .side-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 3rem; padding: 10vh 0; }
+    .side-card-wrap { opacity: 0; } /* Initial state handled by GSAP */
 
-        .panel {
-            height: 100vh;
-            width: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: absolute;
-            top: 0;
-            left: 0;
-            visibility: hidden;
-            will-change: transform;
-        }
+    /* 3. Conveyor */
+    .conveyor-sec { background: var(--surface); padding: 10vh 0; }
+    .track { display: flex; gap: 2rem; padding: 0 clamp(1.5rem, 5vw, 5rem); width: max-content; }
+    .conveyor-card { width: clamp(260px, 22vw, 380px); aspect-ratio: 3/4; background: var(--bg); border-radius: var(--radius); display: flex; align-items: center; justify-content: center; font-weight: 600; border: 1px solid rgba(255,255,255,0.05); position: relative; overflow: hidden; }
+    .conveyor-card::after { content: ''; position: absolute; inset: 0; background: radial-gradient(circle at 50% 0%, var(--accent-glow), transparent 70%); opacity: 0; transition: opacity 0.5s; }
+    .conveyor-card:hover::after { opacity: 1; }
 
-        .card {
-            width: 70vw;
-            height: 70vh;
-            background: #111;
-            border: 1px solid #222;
-            position: relative;
-            overflow: hidden;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
+    /* 4. Split Convergence */
+    .split { display: flex; height: 100vh; position: relative; }
+    .split-panel { flex: 1; display: flex; align-items: center; justify-content: center; padding: 2rem; background: var(--surface); will-change: transform; }
+    .split-left { border-right: 1px solid rgba(255,255,255,0.05); }
+    .split-right { background: var(--surface-alt); }
 
-        .card img {
-            width: 110%;
-            height: 110%;
-            object-fit: cover;
-            opacity: 0.5;
-            position: absolute;
-        }
+    /* 5. Stack Deck */
+    .stack { position: relative; height: 100vh; display: flex; align-items: center; justify-content: center; }
+    .deck-card { position: absolute; width: clamp(300px, 28vw, 450px); background: var(--surface); border-radius: var(--radius); padding: 2rem; border: 1px solid rgba(255,255,255,0.06); box-shadow: 0 20px 60px rgba(0,0,0,0.4); }
 
-        .card h2 {
-            position: relative;
-            font-size: 8vw;
-            z-index: 2;
-            text-transform: uppercase;
-            pointer-events: none;
-        }
+    /* 6. Parallax Grid */
+    .p-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2rem; padding: 10vh 0; }
+    .p-cell { background: var(--surface); border-radius: var(--radius); aspect-ratio: 1; display: flex; align-items: center; justify-content: center; font-weight: 600; will-change: transform; border: 1px solid rgba(255,255,255,0.05); }
 
-        /* 4. The Conveyor (Horizontal Scroll) */
-        .conveyor-outer {
-            height: 300vh; /* Scroll distance */
-            background: var(--accent);
-        }
-        .conveyor-sticky {
-            height: 100vh;
-            position: sticky;
-            top: 0;
-            display: flex;
-            align-items: center;
-            overflow: hidden;
-        }
-        .conveyor-list {
-            display: flex;
-            white-space: nowrap;
-            padding-left: 100vw;
-        }
-        .conveyor-item {
-            font-size: 20vh;
-            font-weight: 900;
-            color: #000;
-            margin-right: 100px;
-        }
+    /* 7. Clip Reveal */
+    .clip { display: flex; align-items: center; gap: 4rem; flex-wrap: wrap; }
+    .clip-img { width: clamp(300px, 40vw, 600px); aspect-ratio: 4/3; background: linear-gradient(135deg, #222, #333); border-radius: var(--radius); position: relative; overflow: hidden; }
+    .clip-mask { position: absolute; inset: 0; background: var(--bg); will-change: clip-path; }
+    .clip-content { flex: 1; min-width: 300px; }
 
-        /* 5. Split Text Reveal */
-        .reveal-section {
-            height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: #fff;
-            color: #000;
-            overflow: hidden;
-        }
-        .reveal-text {
-            font-size: 10vw;
-            display: flex;
-            gap: 20px;
-        }
-        .word-left { transform: translateX(-100vw); }
-        .word-right { transform: translateX(100vw); }
+    /* 8. Z-Tunnel */
+    .tunnel { position: relative; height: 100vh; display: flex; align-items: center; justify-content: center; perspective: 1000px; }
+    .tunnel-card { position: absolute; width: 280px; height: 380px; background: var(--surface); border-radius: var(--radius); border: 1px solid rgba(255,255,255,0.08); display: flex; align-items: center; justify-content: center; font-weight: 600; will-change: transform, opacity, filter; }
 
-        .footer {
-            height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-        }
-    </style>
+    /* 9. Unmask Curtain */
+    .unmask { position: relative; height: 100vh; overflow: hidden; }
+    .unmask-bg { position: absolute; inset: 0; background: var(--surface); display: flex; align-items: center; justify-content: center; }
+    .curtain { position: absolute; bottom: 0; left: 0; right: 0; height: 100%; background: var(--bg); z-index: 2; will-change: transform; }
+    .unmask-content { position: relative; z-index: 3; padding: 4rem; text-align: center; opacity: 0.3; transition: opacity 0.4s; }
+
+    /* 10. Contact */
+    .contact { align-items: center; text-align: center; background: var(--surface); }
+    .contact h2 { margin-bottom: 1rem; }
+    .btn { display: inline-block; padding: 1rem 2.5rem; background: var(--accent); color: #fff; font-weight: 600; border-radius: 99px; text-decoration: none; margin-top: 2rem; transition: transform 0.3s, box-shadow 0.3s; }
+    .btn:hover { transform: translateY(-4px); box-shadow: 0 12px 30px rgba(94,71,217,0.4); }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .side-grid, .p-grid { grid-template-columns: 1fr; }
+      .split { flex-direction: column; height: auto; min-height: 100vh; }
+      .clip { flex-direction: column; }
+      .track { gap: 1.5rem; }
+    }
+  </style>
 </head>
 <body>
 
-    <main>
-        <section class="hero">
-            <h1 class="hero-title">SCROLL</h1>
-        </section>
+  <main>
+    <!-- 1. Hero Parallax -->
+    <section class="hero">
+      <h1 class="hero-title">Scroll<br>Driven</h1>
+      <div class="scroll-indicator">↓ Scroll to animate</div>
+    </section>
 
-        <section class="work-section" id="work-trigger">
-            <div class="panel" id="panel-1">
-                <div class="card">
-                    <img src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=80&w=1000">
-                    <h2>DESIGN</h2>
-                </div>
-            </div>
-            <div class="panel" id="panel-2">
-                <div class="card">
-                    <img src="https://images.unsplash.com/photo-1633167606207-d840b5070fc2?auto=format&fit=crop&q=80&w=1000">
-                    <h2>MOTION</h2>
-                </div>
-            </div>
-            <div class="panel" id="panel-3">
-                <div class="card">
-                    <img src="https://images.unsplash.com/photo-1614850523296-d8c1af93d400?auto=format&fit=crop&q=80&w=1500">
-                    <h2>CODE</h2>
-                </div>
-            </div>
-        </section>
+    <!-- 2. Side Slide Cards -->
+    <section class="container">
+      <div class="side-grid">
+        <div class="card-wrap side-card-wrap"><div class="card"><span class="card-tag">React</span><h3>Nova Analytics</h3><p>Real-time data visualization with fluid state management.</p></div></div>
+        <div class="card-wrap side-card-wrap"><div class="card"><span class="card-tag">WebGL</span><h3>Aether Space</h3><p>Immersive 3D environments with dynamic lighting.</p></div></div>
+        <div class="card-wrap side-card-wrap"><div class="card"><span class="card-tag">GSAP</span><h3>Chrono Flow</h3><p>Scroll-driven storytelling timeline engine.</p></div></div>
+      </div>
+    </section>
 
-        <section class="conveyor-outer">
-            <div class="conveyor-sticky">
-                <div class="conveyor-list">
-                    <div class="conveyor-item">CINEMATIC</div>
-                    <div class="conveyor-item">PRECISION</div>
-                    <div class="conveyor-item">INTERACTIVE</div>
-                </div>
-            </div>
-        </section>
+    <!-- 3. Conveyor Belt -->
+    <section class="conveyor-sec">
+      <div class="container" style="margin-bottom: 3rem;"><h2>Expertise</h2><p>Horizontal motion controlled by vertical scroll. Pinned for cinematic pacing.</p></div>
+      <div class="track">
+        <div class="conveyor-card">UI Systems</div>
+        <div class="conveyor-card">Creative Dev</div>
+        <div class="conveyor-card">Motion Design</div>
+        <div class="conveyor-card">Performance</div>
+        <div class="conveyor-card">Prototyping</div>
+        <div class="conveyor-card">Architecture</div>
+        <div class="conveyor-card">WebGL</div>
+        <div class="conveyor-card">Interaction</div>
+      </div>
+    </section>
 
-        <section class="reveal-section">
-            <div class="reveal-text">
-                <div class="word-left">CREATIVE</div>
-                <div class="word-right">SOUL</div>
-            </div>
-        </section>
+    <!-- 4. Split Convergence -->
+    <section class="split">
+      <div class="split-panel split-left"><h2>Design<br>Systems</h2><p style="margin-top:1rem">Scalable component libraries built for growth.</p></div>
+      <div class="split-panel split-right"><h2>Engineering<br>Excellence</h2><p style="margin-top:1rem">Optimized pipelines for high-performance delivery.</p></div>
+    </section>
 
-        <footer class="footer">
-            <h2 id="outro-text">GENESIS 2026</h2>
-        </footer>
-    </main>
+    <!-- 5. Stack Deck -->
+    <section class="stack">
+      <div class="deck-card"><span class="card-tag">Case 01</span><h3>Orbit CMS</h3><p>Headless architecture with drag-and-drop builder.</p></div>
+      <div class="deck-card"><span class="card-tag">Case 02</span><h3>Velo UI</h3><p>Design system for rapid prototyping.</p></div>
+      <div class="deck-card"><span class="card-tag">Case 03</span><h3>Prism Engine</h3><p>Real-time shader playground.</p></div>
+    </section>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
-    <script src="https://unpkg.com/@studio-freight/lenis@1.0.33/dist/lenis.min.js"></script>
+    <!-- 6. Parallax Grid -->
+    <section class="container">
+      <div class="p-grid">
+        <div class="p-cell">01</div><div class="p-cell">02</div><div class="p-cell">03</div>
+        <div class="p-cell">04</div><div class="p-cell">05</div><div class="p-cell">06</div>
+      </div>
+    </section>
 
-    <script>
-        gsap.registerPlugin(ScrollTrigger);
+    <!-- 7. Clip Reveal -->
+    <section class="container clip">
+      <div class="clip-img">
+        <div class="clip-mask"></div>
+      </div>
+      <div class="clip-content">
+        <h2>Precision<br>Masking</h2>
+        <p>Content reveals through dynamic clip-path boundaries tied directly to scroll position.</p>
+      </div>
+    </section>
 
-        // 1. Lenis Smooth Scrolling (Inertia setup)
-        const lenis = new Lenis({
-            duration: 1.5,
-            easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t))
-        });
-        function raf(time) { lenis.raf(time); requestAnimationFrame(raf); }
-        requestAnimationFrame(raf);
+    <!-- 8. Z-Tunnel -->
+    <section class="tunnel">
+      <div class="tunnel-card">Depth 01</div>
+      <div class="tunnel-card">Depth 02</div>
+      <div class="tunnel-card">Depth 03</div>
+    </section>
 
-        // 2. Hero Action: Massive Zoom
-        gsap.to(".hero-title", {
-            scale: 50,
-            opacity: 0,
-            scrollTrigger: {
-                trigger: ".hero",
-                start: "top top",
-                end: "bottom top",
-                scrub: 1,
-                pin: true
-            }
-        });
+    <!-- 9. Unmask Curtain -->
+    <section class="unmask">
+      <div class="unmask-bg"><h2>Next Phase</h2></div>
+      <div class="curtain"></div>
+      <div class="unmask-content">
+        <h2>Ready to Deploy</h2>
+        <p style="margin:1rem auto">Scroll clears the curtain. Reversing scrolls it back.</p>
+      </div>
+    </section>
 
-        // 3. The Master Pinning Sequence (Logical Card Stacking)
-        // We create a timeline that forces cards to slide in one by one while page stays pinned
-        const workTl = gsap.timeline({
-            scrollTrigger: {
-                trigger: "#work-trigger",
-                start: "top top",
-                end: "+=3000", // Makes the section stay pinned for 3000px of scrolling
-                scrub: 1,
-                pin: true,
-                anticipatePin: 1
-            }
-        });
+    <!-- 10. Contact -->
+    <section class="contact">
+      <div class="container">
+        <h2 class="contact-title">Let's Create</h2>
+        <p>Next-generation interactive experiences built on scroll physics.</p>
+        <a href="#" class="btn contact-btn">Start a Project</a>
+      </div>
+    </section>
+  </main>
 
-        // Panel 1 - Fade in & Parallax Image
-        workTl.set("#panel-1", { visibility: "visible" })
-              .from("#panel-1 .card", { xPercent: -150, rotate: -20 })
-              .from("#panel-1 img", { scale: 1.5 }, 0);
+  <script>
+    // 1. Lenis Setup (Cinematic Smooth Scroll)
+    const lenis = new Lenis({
+      duration: 1.1,
+      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      smoothWheel: true,
+      wheelMultiplier: 1.2 // Slightly slower scroll for better readability
+    });
 
-        // Panel 2 - Slides over Panel 1
-        workTl.set("#panel-2", { visibility: "visible" })
-              .from("#panel-2 .card", { xPercent: 150, rotate: 20 })
-              .to("#panel-1 .card", { scale: 0.8, opacity: 0.5 }, "<");
+    lenis.on('scroll', ScrollTrigger.update);
+    gsap.ticker.add((time) => lenis.raf(time * 1000));
+    gsap.ticker.lagSmoothing(0);
 
-        // Panel 3 - Slides up from bottom
-        workTl.set("#panel-3", { visibility: "visible" })
-              .from("#panel-3 .card", { yPercent: 150 })
-              .to("#panel-2 .card", { scale: 0.8, opacity: 0.5 }, "<");
+    gsap.registerPlugin(ScrollTrigger);
 
-        // 4. Horizontal Conveyor Action
-        gsap.to(".conveyor-list", {
-            xPercent: -100,
-            x: "100vw",
-            ease: "none",
-            scrollTrigger: {
-                trigger: ".conveyor-outer",
-                start: "top top",
-                end: "bottom top",
-                scrub: 1
-            }
-        });
+    // 2. Hero Parallax
+    gsap.to('.hero-title', {
+      y: 120, scale: 0.85, opacity: 0.2,
+      ease: 'none',
+      scrollTrigger: { trigger: '.hero', start: 'top top', end: 'bottom top', scrub: 1.2 }
+    });
 
-        // 5. Split Reveal Action
-        const revealTl = gsap.timeline({
-            scrollTrigger: {
-                trigger: ".reveal-section",
-                start: "top 80%",
-                end: "top 20%",
-                scrub: 1
-            }
-        });
-        revealTl.to(".word-left", { x: 0 }, 0)
-                .to(".word-right", { x: 0 }, 0);
+    // 3. Side Slide Cards (Paced for Readability)
+    document.querySelectorAll('.side-card-wrap').forEach((wrap, i) => {
+      const isLeft = i % 2 === 0;
+      gsap.set(wrap, { x: isLeft ? -150 : 150, opacity: 0 });
+      gsap.to(wrap, {
+        x: 0, opacity: 1,
+        ease: 'power3.out',
+        scrollTrigger: {
+          trigger: wrap,
+          start: 'top 80%',
+          end: 'bottom 20%',
+          scrub: 1.5 // Cinematic inertia, slower = easier to read
+        }
+      });
+    });
 
-        // 6. Final Letter Spacing Action
-        gsap.from("#outro-text", {
-            letterSpacing: "-1em",
-            opacity: 0,
-            scrollTrigger: {
-                trigger: ".footer",
-                start: "top bottom",
-                end: "bottom bottom",
-                scrub: 1
-            }
-        });
+    // 4. Conveyor Belt
+    const track = document.querySelector('.track');
+    gsap.to(track, {
+      x: () => -(track.scrollWidth - window.innerWidth + 100),
+      ease: 'none',
+      scrollTrigger: {
+        trigger: '.conveyor-sec',
+        start: 'top top',
+        end: () => `+=${track.scrollWidth * 0.6}`, // Long scroll distance = controlled speed
+        pin: true,
+        scrub: 1.4,
+        invalidateOnRefresh: true
+      }
+    });
 
-    </script>
+    // 5. Split Convergence
+    const leftPanel = document.querySelector('.split-left');
+    const rightPanel = document.querySelector('.split-right');
+    gsap.to(leftPanel, { x: 0, scrollTrigger: { trigger: '.split', start: 'top top', end: '+=150%', pin: true, scrub: 1.3 }});
+    gsap.from(leftPanel, { x: '-30%', ease: 'none' });
+    gsap.to(rightPanel, { x: 0, scrollTrigger: { trigger: '.split', start: 'top top', end: '+=150%', pin: true, scrub: 1.3 }});
+    gsap.from(rightPanel, { x: '30%', ease: 'none' });
+    // Meet in middle, then separate as scroll continues
+    const splitTL = gsap.timeline({ scrollTrigger: { trigger: '.split', start: 'center center', end: '+=150%', pin: true, scrub: 1.3 }});
+    splitTL.to(leftPanel, { x: '-25%' }).to(rightPanel, { x: '25%' }, '<');
+
+    // 6. Stack Deck
+    document.querySelectorAll('.deck-card').forEach((card, i) => {
+      gsap.to(card, {
+        y: () => (i - 1) * -80,
+        scale: () => 1 - (i * 0.08),
+        rotateX: () => 4 + (i * 2),
+        zIndex: 3 - i,
+        ease: 'none',
+        scrollTrigger: { trigger: '.stack', start: 'top top', end: '+=200%', pin: true, scrub: 1.2 }
+      });
+    });
+
+    // 7. Parallax Grid
+    document.querySelectorAll('.p-cell').forEach((cell, i) => {
+      const speed = 0.2 + (i % 3) * 0.15;
+      gsap.to(cell, {
+        y: -150 * speed,
+        ease: 'none',
+        scrollTrigger: { trigger: '.p-grid', start: 'top 70%', end: 'bottom 30%', scrub: 1.4 }
+      });
+    });
+
+    // 8. Clip Reveal
+    gsap.to('.clip-mask', {
+      clipPath: 'inset(0 100% 0 0)',
+      ease: 'none',
+      scrollTrigger: { trigger: '.clip', start: 'top 60%', end: 'bottom 40%', scrub: 1.3 }
+    });
+
+    // 9. Z-Tunnel
+    document.querySelectorAll('.tunnel-card').forEach((card, i) => {
+      gsap.set(card, { z: -300, opacity: 0, rotateY: 15 });
+      gsap.to(card, {
+        z: 100, opacity: 1, rotateY: -5, scale: 1 + (i * 0.1),
+        ease: 'none',
+        scrollTrigger: { trigger: '.tunnel', start: 'top bottom', end: 'bottom top', scrub: 1.5 }
+      });
+    });
+
+    // 10. Unmask Curtain
+    gsap.to('.curtain', {
+      y: '-100%',
+      ease: 'none',
+      scrollTrigger: { trigger: '.unmask', start: 'top top', end: '+=180%', pin: true, scrub: 1.3 }
+    });
+    gsap.to('.unmask-content', {
+      opacity: 1,
+      scrollTrigger: { trigger: '.unmask', start: 'top center', end: 'center center', scrub: 1 }
+    });
+
+    // Contact Assemble
+    gsap.from('.contact-title', { y: 60, opacity: 0, rotateX: 15, scrollTrigger: { trigger: '.contact', start: 'top 60%', end: 'bottom 20%', scrub: 1.2 }});
+    gsap.from('.contact-btn', { scale: 0.8, opacity: 0, y: 30, scrollTrigger: { trigger: '.contact', start: 'top 50%', end: 'center center', scrub: 1.3 }});
+
+    // Cleanup & Resize
+    window.addEventListener('resize', () => ScrollTrigger.refresh());
+  </script>
 </body>
 </html>
