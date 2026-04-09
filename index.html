@@ -1,316 +1,335 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Cinematic Scroll Portfolio</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cinematic Scroll Portfolio</title>
+  
+  <!-- GSAP & ScrollTrigger -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+  <!-- Lenis Smooth Scroll -->
+  <script src="https://unpkg.com/lenis@1.1.18/dist/lenis.min.js"></script>
 
-<!-- GSAP -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+  <style>
+    :root {
+      --bg: #0a0a0c;
+      --surface: #141418;
+      --surface-hover: #1a1a20;
+      --text: #f0f0f2;
+      --text-muted: #8a8a94;
+      --accent: #6b5ce7;
+      --accent-glow: rgba(107, 92, 231, 0.3);
+      --radius: 12px;
+      --transition: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    }
 
-<!-- Lenis -->
-<script src="https://cdn.jsdelivr.net/npm/@studio-freight/lenis@1.0.42/bundled/lenis.min.js"></script>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    html.lenis, html.lenis body {
+      height: auto;
+      overflow-x: hidden;
+    }
 
-<style>
-:root{
-  --bg:#0a0a0a;
-  --light:#f4f4f4;
-  --card:#151515;
-  --accent:#6ee7ff;
-}
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      line-height: 1.5;
+      overflow-x: hidden;
+    }
 
-*{
-  margin:0;
-  padding:0;
-  box-sizing:border-box;
-  font-family: system-ui;
-}
+    /* Utility */
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 0 clamp(1.5rem, 5vw, 4rem);
+    }
 
-body{
-  background:var(--bg);
-  color:#fff;
-  overflow-x:hidden;
-}
+    section {
+      position: relative;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
 
-/* GENERAL */
-section{
-  min-height:100vh;
-  padding:120px 6%;
-  display:flex;
-  flex-direction:column;
-  justify-content:center;
-}
+    /* Hero */
+    .hero {
+      text-align: center;
+      padding-top: 10vh;
+    }
+    .hero-title {
+      font-size: clamp(3rem, 12vw, 9rem);
+      font-weight: 800;
+      letter-spacing: -0.04em;
+      line-height: 0.9;
+      margin-bottom: 1.5rem;
+      background: linear-gradient(135deg, #fff 0%, #8a8a94 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .hero-sub {
+      font-size: clamp(1rem, 2vw, 1.5rem);
+      color: var(--text-muted);
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    .scroll-hint {
+      margin-top: 4rem;
+      font-size: 0.85rem;
+      color: var(--accent);
+      opacity: 0.7;
+      animation: bounce 2s infinite;
+    }
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(8px); }
+    }
 
-h1{
-  font-size:clamp(2rem,5vw,4rem);
-  margin-bottom:20px;
-}
+    /* Conveyor Belt Section */
+    .conveyor-section {
+      overflow: hidden;
+      background: var(--surface);
+      padding: 10vh 0;
+    }
+    .conveyor-track {
+      display: flex;
+      gap: clamp(1rem, 3vw, 2.5rem);
+      padding: 0 clamp(1.5rem, 5vw, 4rem);
+      width: max-content;
+    }
+    .conveyor-item {
+      width: clamp(280px, 25vw, 400px);
+      aspect-ratio: 3/4;
+      background: var(--bg);
+      border-radius: var(--radius);
+      border: 1px solid rgba(255,255,255,0.08);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+      position: relative;
+      overflow: hidden;
+    }
+    .conveyor-item::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, transparent 40%, var(--accent-glow) 100%);
+      opacity: 0;
+      transition: opacity 0.4s var(--transition);
+    }
+    .conveyor-item:hover::before { opacity: 1; }
 
-p{
-  opacity:.7;
-  max-width:600px;
-}
+    /* Projects Grid */
+    .projects {
+      padding: 15vh 0;
+    }
+    .section-title {
+      font-size: clamp(2rem, 5vw, 4rem);
+      margin-bottom: 5rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+    .projects-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 3rem;
+    }
+    .card-wrapper {
+      will-change: transform;
+      perspective: 1000px;
+    }
+    .project-card {
+      background: var(--surface);
+      border-radius: var(--radius);
+      padding: 2rem;
+      border: 1px solid rgba(255,255,255,0.05);
+      transition: transform 0.3s var(--transition), box-shadow 0.3s var(--transition);
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    .project-card:hover {
+      transform: translateY(-8px) scale(1.02);
+      box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+      border-color: var(--accent);
+    }
+    .card-tag {
+      display: inline-block;
+      background: rgba(107, 92, 231, 0.15);
+      color: var(--accent);
+      padding: 0.3rem 0.8rem;
+      border-radius: 99px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      width: fit-content;
+    }
+    .card-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+    }
+    .card-desc {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+    }
 
-/* HERO */
-.hero{
-  align-items:center;
-  text-align:center;
-}
+    /* Footer */
+    .contact {
+      min-height: 50vh;
+      text-align: center;
+      background: var(--surface);
+      border-top: 1px solid rgba(255,255,255,0.05);
+    }
+    .contact h2 {
+      font-size: clamp(2rem, 6vw, 5rem);
+      margin-bottom: 1rem;
+    }
+    .contact p { color: var(--text-muted); }
 
-/* FLOATING ELEMENT */
-.floating{
-  position:absolute;
-  width:200px;
-  height:200px;
-  border-radius:50%;
-  background: radial-gradient(circle, var(--accent), transparent);
-  filter:blur(60px);
-  top:20%;
-  left:10%;
-}
-
-/* CARDS */
-.cards{
-  display:flex;
-  flex-direction:column;
-  gap:80px;
-}
-
-.card{
-  width:60%;
-  padding:40px;
-  background:var(--card);
-  border-radius:20px;
-  backdrop-filter:blur(10px);
-  transition:.4s;
-}
-
-.card:hover{
-  transform:scale(1.05) rotate(-1deg);
-}
-
-.card:nth-child(even){
-  align-self:flex-end;
-}
-
-/* HORIZONTAL */
-.horizontal{
-  position:relative;
-  height:100vh;
-  overflow:hidden;
-}
-
-.track{
-  display:flex;
-  gap:40px;
-  position:absolute;
-  top:50%;
-  transform:translateY(-50%);
-}
-
-.h-card{
-  min-width:320px;
-  height:220px;
-  background:#1f1f1f;
-  border-radius:20px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-size:1.2rem;
-}
-
-/* PARALLAX */
-.parallax{
-  height:120vh;
-  position:relative;
-}
-
-.layer{
-  position:absolute;
-  width:100%;
-  height:100%;
-}
-
-.layer.bg{
-  background:linear-gradient(#111,#000);
-  z-index:1;
-}
-
-.layer.mid{
-  background:radial-gradient(circle at center, #222, transparent);
-  z-index:2;
-}
-
-.layer.front{
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-size:3rem;
-  z-index:3;
-}
-
-/* LIGHT SECTION */
-.light{
-  background:var(--light);
-  color:#111;
-}
-
-/* FOOTER */
-.footer{
-  text-align:center;
-  padding:60px;
-  opacity:.6;
-}
-
-/* RESPONSIVE */
-@media(max-width:768px){
-  .card{width:100%;}
-  .h-card{min-width:240px;}
-}
-</style>
+    /* Responsive */
+    @media (max-width: 768px) {
+      .projects-grid { grid-template-columns: 1fr; gap: 2rem; }
+      .conveyor-item { width: 80vw; }
+    }
+  </style>
 </head>
-
 <body>
 
-<div class="floating"></div>
+  <main>
+    <section class="hero">
+      <div class="container">
+        <h1 class="hero-title">Motion &<br>Code</h1>
+        <p class="hero-sub">Scroll to experience a fully scroll-driven, reversible animation system.</p>
+        <div class="scroll-hint">↓ Scroll down</div>
+      </div>
+    </section>
 
-<!-- HERO -->
-<section class="hero">
-  <h1>Scroll Controls Everything</h1>
-  <p>This is not a website. It's a scroll-driven experience.</p>
-</section>
+    <section class="conveyor-section">
+      <div class="conveyor-track">
+        <div class="conveyor-item">UI/UX Design</div>
+        <div class="conveyor-item">WebGL Experiments</div>
+        <div class="conveyor-item">Creative Dev</div>
+        <div class="conveyor-item">3D Motion</div>
+        <div class="conveyor-item">Interactive Prototypes</div>
+        <div class="conveyor-item">Performance Art</div>
+        <div class="conveyor-item">System Design</div>
+      </div>
+    </section>
 
-<!-- SLIDING CARDS -->
-<section>
-  <div class="cards">
-    <div class="card">Creative Project 01</div>
-    <div class="card">Creative Project 02</div>
-    <div class="card">Creative Project 03</div>
-    <div class="card">Creative Project 04</div>
-  </div>
-</section>
+    <section class="projects">
+      <div class="container">
+        <h2 class="section-title">Selected Works</h2>
+        <div class="projects-grid">
+          <div class="card-wrapper"><div class="project-card"><span class="card-tag">React</span><h3 class="card-title">Nova Dashboard</h3><p class="card-desc">Real-time analytics with fluid data visualization.</p></div></div>
+          <div class="card-wrapper"><div class="project-card"><span class="card-tag">Three.js</span><h3 class="card-title">Aether World</h3><p class="card-desc">Immersive 3D environment with dynamic lighting.</p></div></div>
+          <div class="card-wrapper"><div class="project-card"><span class="card-tag">GSAP</span><h3 class="card-title">Chrono Flow</h3><p class="card-desc">Scroll-driven timeline for archival storytelling.</p></div></div>
+          <div class="card-wrapper"><div class="project-card"><span class="card-tag">Framer</span><h3 class="card-title">Velo UI</h3><p class="card-desc">Component system built for rapid prototyping.</p></div></div>
+          <div class="card-wrapper"><div class="project-card"><span class="card-tag">WebGL</span><h3 class="card-title">Prism Engine</h3><p class="card-desc">Real-time shader playground for creatives.</p></div></div>
+          <div class="card-wrapper"><div class="project-card"><span class="card-tag">Vue</span><h3 class="card-title">Orbit CMS</h3><p class="card-desc">Headless content manager with drag-and-drop.</p></div></div>
+        </div>
+      </div>
+    </section>
 
-<!-- PARALLAX DEPTH -->
-<section class="parallax">
-  <div class="layer bg"></div>
-  <div class="layer mid"></div>
-  <div class="layer front">Depth Motion</div>
-</section>
+    <section class="contact">
+      <div class="container">
+        <h2>Let's Build</h2>
+        <p>Next-gen interactive experiences.</p>
+      </div>
+    </section>
+  </main>
 
-<!-- HORIZONTAL SCROLL -->
-<section class="horizontal">
-  <div class="track">
-    <div class="h-card">Project A</div>
-    <div class="h-card">Project B</div>
-    <div class="h-card">Project C</div>
-    <div class="h-card">Project D</div>
-    <div class="h-card">Project E</div>
-    <div class="h-card">Project F</div>
-  </div>
-</section>
+  <script>
+    // 1. Initialize Lenis for cinematic smooth scrolling
+    const lenis = new Lenis({
+      duration: 1.2,
+      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      orientation: 'vertical',
+      gestureOrientation: 'vertical',
+      smoothWheel: true,
+    });
 
-<!-- LIGHT BREAK -->
-<section class="light">
-  <h1>Smooth. Cinematic. Controlled.</h1>
-</section>
+    // Sync Lenis with GSAP ScrollTrigger
+    lenis.on('scroll', ScrollTrigger.update);
+    gsap.ticker.add((time) => lenis.raf(time * 1000));
+    gsap.ticker.lagSmoothing(0);
 
-<!-- FOOTER -->
-<div class="footer">© 2026 Portfolio Experience</div>
+    // 2. Register GSAP Plugin
+    gsap.registerPlugin(ScrollTrigger);
 
-<script>
-gsap.registerPlugin(ScrollTrigger);
+    // 3. Conveyor Belt: Horizontal movement controlled by vertical scroll
+    const conveyor = document.querySelector('.conveyor-section');
+    const track = document.querySelector('.conveyor-track');
 
-/* LENIS */
-const lenis = new Lenis({ lerp:0.08 });
-
-function raf(t){
-  lenis.raf(t);
-  requestAnimationFrame(raf);
-}
-requestAnimationFrame(raf);
-
-lenis.on('scroll', ScrollTrigger.update);
-
-gsap.ticker.add((t)=>{
-  lenis.raf(t*1000);
-});
-
-gsap.ticker.lagSmoothing(0);
-
-/* FLOATING ORB PARALLAX */
-gsap.to(".floating",{
-  y:200,
-  x:200,
-  scrollTrigger:{
-    trigger:".hero",
-    start:"top top",
-    end:"bottom top",
-    scrub:true
-  }
-});
-
-/* CARDS SLIDE */
-gsap.utils.toArray(".card").forEach((card,i)=>{
-  let dir = i % 2 === 0 ? -300 : 300;
-
-  gsap.fromTo(card,
-    { x:dir, rotate: i%2?5:-5 },
-    {
-      x:0,
-      rotate:0,
-      ease:"power4.out",
-      scrollTrigger:{
-        trigger:card,
-        start:"top 85%",
-        end:"top 30%",
-        scrub:true
+    gsap.to(track, {
+      x: () => -(track.scrollWidth - window.innerWidth),
+      ease: "none",
+      scrollTrigger: {
+        trigger: conveyor,
+        start: "top top",
+        end: () => `+=${track.scrollWidth - window.innerWidth}`,
+        pin: true,
+        scrub: 1.2, // Cinematic inertia
+        invalidateOnRefresh: true // Recalculate on resize
       }
-    }
-  );
-});
+    });
 
-/* PARALLAX LAYERS */
-gsap.to(".layer.bg",{
-  y:100,
-  scrollTrigger:{
-    trigger:".parallax",
-    scrub:true
-  }
-});
+    // 4. Side-Sliding Cards: Alternating directions, fully reversible
+    const cards = document.querySelectorAll('.card-wrapper');
+    cards.forEach((wrapper, i) => {
+      // Alternate starting direction: even from left, odd from right
+      const startDir = i % 2 === 0 ? "-100vw" : "100vw";
+      const endDir = i % 2 === 0 ? "100vw" : "-100vw";
 
-gsap.to(".layer.mid",{
-  y:200,
-  scrollTrigger:{
-    trigger:".parallax",
-    scrub:true
-  }
-});
+      gsap.set(wrapper, { x: startDir });
+      
+      gsap.to(wrapper, {
+        x: endDir,
+        ease: "power3.inOut",
+        scrollTrigger: {
+          trigger: wrapper,
+          start: "top 85%",
+          end: "bottom 15%",
+          scrub: 1.2
+        }
+      });
+    });
 
-gsap.to(".layer.front",{
-  y:300,
-  scrollTrigger:{
-    trigger:".parallax",
-    scrub:true
-  }
-});
+    // 5. Parallax Elements: Background/foreground depth
+    const heroTitle = document.querySelector('.hero-title');
+    gsap.to(heroTitle, {
+      y: 150,
+      scale: 0.9,
+      opacity: 0.3,
+      ease: "none",
+      scrollTrigger: {
+        trigger: ".hero",
+        start: "top top",
+        end: "bottom top",
+        scrub: 1.2
+      }
+    });
 
-/* HORIZONTAL SCROLL */
-const track = document.querySelector(".track");
+    // Subtle floating effect for conveyor items
+    document.querySelectorAll('.conveyor-item').forEach((item, i) => {
+      gsap.to(item, {
+        y: () => (i % 2 === 0 ? 20 : -20),
+        duration: 3,
+        repeat: -1,
+        yoyo: true,
+        ease: "sine.inOut"
+      });
+    });
 
-gsap.to(track,{
-  x:()=> -(track.scrollWidth - window.innerWidth),
-  ease:"none",
-  scrollTrigger:{
-    trigger:".horizontal",
-    start:"top top",
-    end:()=> "+=" + track.scrollWidth,
-    scrub:true,
-    pin:true
-  }
-});
-
-</script>
-
+    // 6. Cleanup on resize (optional but recommended for performance)
+    window.addEventListener('resize', () => {
+      ScrollTrigger.refresh();
+    });
+  </script>
 </body>
 </html>
