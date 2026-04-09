@@ -1,310 +1,321 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>The Director's Cut | Portfolio</title>
-    
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@900&family=Syncopate:wght@700&display=swap" rel="stylesheet">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cinematic Scroll Fixed</title>
 
-    <style>
-        :root {
-            --bg: #000;
-            --text: #fff;
-            --accent: #ff003c;
-        }
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;900&display=swap" rel="stylesheet">
 
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { 
-            background: var(--bg); 
-            color: var(--text); 
-            font-family: 'Inter', sans-serif; 
-            overflow-x: hidden;
-        }
+<style>
+:root {
+    --bg: #000;
+    --accent: #ff3e00;
+    --text: #fff;
+}
 
-        /* 1. Cinematic Smooth Scroll */
-        html.lenis { height: auto; }
-        .lenis-smooth { scroll-behavior: auto !important; }
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
 
-        /* 2. Hero: Zoom Reveal */
-        .hero {
-            height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-        }
-        .hero-title {
-            font-family: 'Syncopate', sans-serif;
-            font-size: 15vw;
-            letter-spacing: -0.05em;
-            text-transform: uppercase;
-        }
+body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    overflow-x: hidden;
+}
 
-        /* 3. The Stacking Section (Pinning Logic) */
-        .work-section {
-            position: relative;
-            background: #050505;
-            height: 100vh; /* Added explicit height */
-        }
+/* Progress bar */
+.scroll-progress {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 0%;
+    height: 4px;
+    background: var(--accent);
+    z-index: 9999;
+}
 
-        .panel {
-            height: 100vh;
-            width: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: absolute;
-            top: 0;
-            left: 0;
-            visibility: hidden;
-            will-change: transform;
-        }
+section {
+    width: 100%;
+    min-height: 100vh;
+}
 
-        /* Added z-index for proper stacking */
-        #panel-1 { z-index: 1; }
-        #panel-2 { z-index: 2; }
-        #panel-3 { z-index: 3; }
+/* HERO */
+.hero {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #050505;
+}
 
-        .card {
-            width: 70vw;
-            height: 70vh;
-            background: #111;
-            border: 1px solid #222;
-            position: relative;
-            overflow: hidden;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
+.hero-title {
+    font-size: clamp(40px, 12vw, 160px);
+    font-weight: 900;
+    filter: blur(20px);
+    transform: scale(1.4);
+    opacity: 0;
+}
 
-        .card img {
-            width: 110%;
-            height: 110%;
-            object-fit: cover;
-            opacity: 0.5;
-            position: absolute;
-        }
+/* STACK CARDS */
+.stack-section {
+    height: 500vh;
+    background: #0a0a0a;
+}
 
-        .card h2 {
-            position: relative;
-            font-size: 8vw;
-            z-index: 2;
-            text-transform: uppercase;
-            pointer-events: none;
-        }
+.stack-container {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
 
-        /* 4. The Conveyor (Horizontal Scroll) */
-        .conveyor-outer {
-            height: 300vh; /* Scroll distance */
-            background: var(--accent);
-        }
-        .conveyor-sticky {
-            height: 100vh;
-            position: sticky;
-            top: 0;
-            display: flex;
-            align-items: center;
-            overflow: hidden;
-        }
-        .conveyor-list {
-            display: flex;
-            white-space: nowrap;
-            /* Removed padding-left: 100vw - starts from left edge */
-        }
-        .conveyor-item {
-            font-size: 20vh;
-            font-weight: 900;
-            color: #000;
-            margin-right: 100px;
-            flex-shrink: 0; /* Prevent items from shrinking */
-        }
+.stack-card {
+    position: absolute;
+    width: clamp(260px, 60vw, 700px);
+    height: clamp(180px, 50vh, 500px);
+    padding: 2rem;
+    background: #1a1a1a;
+    border: 1px solid #333;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: clamp(1.2rem, 2vw, 2rem);
+    text-align: center;
+}
 
-        /* 5. Split Text Reveal */
-        .reveal-section {
-            height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: #fff;
-            color: #000;
-            overflow: hidden;
-        }
-        .reveal-text {
-            font-size: 10vw;
-            display: flex;
-            gap: 20px;
-        }
-        /* Set initial positions in CSS */
-        .word-left { transform: translateX(-100vw); }
-        .word-right { transform: translateX(100vw); }
+/* CONVEYOR */
+.conveyor-section {
+    height: 250vh;
+    background: var(--accent);
+    color: #000;
+}
 
-        .footer {
-            height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-        }
-    </style>
+.conveyor-sticky {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+}
+
+.conveyor-track {
+    display: flex;
+    gap: 80px;
+    padding: 0 40px;
+}
+
+.conveyor-item {
+    font-size: clamp(40px, 12vw, 140px);
+    font-weight: 900;
+    white-space: nowrap;
+}
+
+/* SPLIT */
+.split-section {
+    display: flex;
+    height: 100vh;
+}
+
+.split-side {
+    width: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: clamp(30px, 5vw, 80px);
+    font-weight: 900;
+}
+
+.left-side {
+    background: #111;
+    transform: translateX(-100%);
+}
+
+.right-side {
+    background: #222;
+    transform: translateX(100%);
+}
+
+/* TEXT FILL */
+.text-fill-section {
+    height: 200vh;
+    display: flex;
+    justify-content: center;
+}
+
+.text-fill {
+    position: sticky;
+    top: 40%;
+    font-size: clamp(30px, 6vw, 90px);
+    font-weight: 900;
+    color: rgba(255,255,255,0.1);
+}
+
+.text-fill span {
+    color: var(--accent);
+    display: inline-block;
+    width: 0;
+    overflow: hidden;
+}
+
+/* OUTRO */
+.outro {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+</style>
 </head>
+
 <body>
 
-    <main>
-        <section class="hero">
-            <h1 class="hero-title">SCROLL</h1>
-        </section>
+<div class="scroll-progress"></div>
 
-        <section class="work-section" id="work-trigger">
-            <div class="panel" id="panel-1">
-                <div class="card">
-                    <img src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=80&w=1000" alt="Design">
-                    <h2>DESIGN</h2>
-                </div>
-            </div>
-            <div class="panel" id="panel-2">
-                <div class="card">
-                    <img src="https://images.unsplash.com/photo-1633167606207-d840b5070fc2?auto=format&fit=crop&q=80&w=1000" alt="Motion">
-                    <h2>MOTION</h2>
-                </div>
-            </div>
-            <div class="panel" id="panel-3">
-                <div class="card">
-                    <img src="https://images.unsplash.com/photo-1614850523296-d8c1af93d400?auto=format&fit=crop&q=80&w=1500" alt="Code">
-                    <h2>CODE</h2>
-                </div>
-            </div>
-        </section>
+<main>
 
-        <section class="conveyor-outer">
-            <div class="conveyor-sticky">
-                <div class="conveyor-list">
-                    <div class="conveyor-item">CINEMATIC</div>
-                    <div class="conveyor-item">PRECISION</div>
-                    <div class="conveyor-item">INTERACTIVE</div>
-                    <div class="conveyor-item">CINEMATIC</div> <!-- Duplicate for seamless loop -->
-                    <div class="conveyor-item">PRECISION</div>
-                    <div class="conveyor-item">INTERACTIVE</div>
-                </div>
-            </div>
-        </section>
+<section class="hero">
+    <h1 class="hero-title">CINEMATIC</h1>
+</section>
 
-        <section class="reveal-section">
-            <div class="reveal-text">
-                <div class="word-left">CREATIVE</div>
-                <div class="word-right">SOUL</div>
-            </div>
-        </section>
+<section class="stack-section">
+    <div class="stack-container">
+        <div class="stack-card">01. THE VISION</div>
+        <div class="stack-card">02. THE DEPTH</div>
+        <div class="stack-card">03. THE MOTION</div>
+    </div>
+</section>
 
-        <footer class="footer">
-            <h2 id="outro-text">GENESIS 2026</h2>
-        </footer>
-    </main>
+<section class="conveyor-section">
+    <div class="conveyor-sticky">
+        <div class="conveyor-track">
+            <div class="conveyor-item">CONTROLLED</div>
+            <div class="conveyor-item">—</div>
+            <div class="conveyor-item">HORIZONTAL</div>
+            <div class="conveyor-item">—</div>
+            <div class="conveyor-item">SCROLL</div>
+        </div>
+    </div>
+</section>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
-    <script src="https://unpkg.com/@studio-freight/lenis@1.0.33/dist/lenis.min.js"></script>
+<section class="split-section">
+    <div class="split-side left-side">CREATIVE</div>
+    <div class="split-side right-side">ENGINE</div>
+</section>
 
-    <script>
-        gsap.registerPlugin(ScrollTrigger);
+<section class="text-fill-section">
+    <div class="text-fill">
+        THE FUTURE IS <span>THE FUTURE IS</span>
+    </div>
+</section>
 
-        // 1. Lenis Smooth Scrolling (Inertia setup)
-        const lenis = new Lenis({
-            duration: 1.5,
-            easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t))
-        });
-        
-        // Connect Lenis to GSAP ScrollTrigger
-        lenis.on('scroll', ScrollTrigger.update);
-        
-        gsap.ticker.add((time) => {
-            lenis.raf(time * 1000);
-        });
-        
-        gsap.ticker.lagSmoothing(0);
+<section class="outro">
+    <h2>END OF EXPERIENCE</h2>
+</section>
 
-        // 2. Hero Action: Massive Zoom (Reduced scale for better performance)
-        gsap.to(".hero-title", {
-            scale: 5, // Reduced from 50 to prevent rendering issues
-            opacity: 0,
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+<script src="https://unpkg.com/@studio-freight/lenis@1.0.33/dist/lenis.min.js"></script>
+
+<script>
+gsap.registerPlugin(ScrollTrigger);
+
+/* SMOOTH SCROLL */
+const lenis = new Lenis({
+    duration: 1.8,
+    lerp: 0.07,
+    smoothWheel: true
+});
+
+function raf(time) {
+    lenis.raf(time);
+    requestAnimationFrame(raf);
+}
+requestAnimationFrame(raf);
+
+/* PROGRESS */
+gsap.to(".scroll-progress", {
+    width: "100%",
+    scrollTrigger: { scrub: 0.3 }
+});
+
+/* HERO */
+gsap.to(".hero-title", {
+    filter: "blur(0px)",
+    scale: 1,
+    opacity: 1,
+    scrollTrigger: {
+        trigger: ".hero",
+        start: "top top",
+        end: "bottom top",
+        scrub: true
+    }
+});
+
+/* STACK CARDS FIXED */
+const cards = gsap.utils.toArray(".stack-card");
+
+cards.forEach((card, i) => {
+    gsap.fromTo(card,
+        { y: 0, scale: 1 },
+        {
+            y: -150 * (cards.length - i),
+            scale: 1 - (i * 0.08),
+            ease: "power2.out",
             scrollTrigger: {
-                trigger: ".hero",
-                start: "top top",
-                end: "bottom top",
-                scrub: 1,
-                pin: true
+                trigger: ".stack-section",
+                start: () => `top+=${i * 600} top`,
+                end: "+=800",
+                scrub: 1.5
             }
-        });
+        }
+    );
+});
 
-        // 3. The Master Pinning Sequence (Logical Card Stacking)
-        const workTl = gsap.timeline({
-            scrollTrigger: {
-                trigger: "#work-trigger",
-                start: "top top",
-                end: "+=3000",
-                scrub: 1,
-                pin: true,
-                anticipatePin: 1
-            }
-        });
+/* CONVEYOR */
+gsap.to(".conveyor-track", {
+    x: "-60%",
+    scrollTrigger: {
+        trigger: ".conveyor-section",
+        start: "top top",
+        end: "bottom top",
+        pin: true,
+        scrub: 1
+    }
+});
 
-        // Panel 1 - Fade in & Parallax Image
-        workTl.set("#panel-1", { visibility: "visible" })
-              .from("#panel-1 .card", { xPercent: -150, rotate: -20, duration: 1 })
-              .from("#panel-1 img", { scale: 1.5, duration: 1 }, "<");
+/* SPLIT */
+gsap.timeline({
+    scrollTrigger: {
+        trigger: ".split-section",
+        start: "top 80%",
+        end: "top 20%",
+        scrub: 1
+    }
+})
+.to(".left-side", { x: "0%" }, 0)
+.to(".right-side", { x: "0%" }, 0);
 
-        // Panel 2 - Slides over Panel 1
-        workTl.set("#panel-2", { visibility: "visible" })
-              .from("#panel-2 .card", { xPercent: 150, rotate: 20, duration: 1 })
-              .to("#panel-1 .card", { scale: 0.8, opacity: 0.5, duration: 1 }, "<");
+/* TEXT FILL */
+gsap.to(".text-fill span", {
+    width: "100%",
+    scrollTrigger: {
+        trigger: ".text-fill-section",
+        start: "top top",
+        end: "bottom top",
+        pin: true,
+        scrub: 1
+    }
+});
+</script>
 
-        // Panel 3 - Slides up from bottom
-        workTl.set("#panel-3", { visibility: "visible" })
-              .from("#panel-3 .card", { yPercent: 150, duration: 1 })
-              .to("#panel-2 .card", { scale: 0.8, opacity: 0.5, duration: 1 }, "<");
-
-        // 4. Horizontal Conveyor Action (FIXED DIRECTION)
-        // Calculate total width for proper scrolling
-        const conveyorList = document.querySelector(".conveyor-list");
-        const conveyorWidth = conveyorList.scrollWidth;
-        
-        gsap.to(".conveyor-list", {
-            x: -conveyorWidth / 2, // Move left by half (since we duplicated items)
-            ease: "none",
-            scrollTrigger: {
-                trigger: ".conveyor-outer",
-                start: "top top",
-                end: "bottom bottom",
-                scrub: 1,
-                pin: ".conveyor-sticky" // Pin the sticky container instead
-            }
-        });
-
-        // 5. Split Reveal Action (FIXED)
-        const revealTl = gsap.timeline({
-            scrollTrigger: {
-                trigger: ".reveal-section",
-                start: "top 80%",
-                end: "center center",
-                scrub: 1
-            }
-        });
-        
-        revealTl.to(".word-left", { x: "100vw", ease: "none" }, 0)
-                .to(".word-right", { x: "-100vw", ease: "none" }, 0);
-
-        // 6. Final Letter Spacing Action
-        gsap.from("#outro-text", {
-            letterSpacing: "-1em",
-            opacity: 0,
-            scrollTrigger: {
-                trigger: ".footer",
-                start: "top bottom",
-                end: "bottom bottom",
-                scrub: 1
-            }
-        });
-
-    </script>
 </body>
 </html>
