@@ -3,101 +3,202 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cinematic Audio Experience</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;900&display=swap" rel="stylesheet">
+    <title>The Director's Cut | Portfolio</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@900&family=Syncopate:wght@700&display=swap" rel="stylesheet">
+
     <style>
-        :root { --bg: #000; --accent: #ff3e00; --text: #fff; }
+        :root {
+            --bg: #000;
+            --text: #fff;
+            --accent: #ff003c;
+        }
+
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; overflow-x: hidden; }
-
-        /* Audio Unlock Overlay */
-        #overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: #000; z-index: 10000; display: flex;
-            align-items: center; justify-content: center; cursor: pointer;
-        }
-        #overlay h2 { font-size: 1.5rem; letter-spacing: 5px; animation: pulse 2s infinite; }
-        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
-
-        /* Progress Bar */
-        .scroll-progress {
-            position: fixed; top: 0; left: 0; width: 0%; height: 4px;
-            background: var(--accent); z-index: 9999;
+        body { 
+            background: var(--bg); 
+            color: var(--text); 
+            font-family: 'Inter', sans-serif; 
+            overflow-x: hidden;
         }
 
-        section { position: relative; width: 100%; min-height: 100vh; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+        /* 1. Cinematic Smooth Scroll */
+        html.lenis { height: auto; }
+        .lenis-smooth { scroll-behavior: auto !important; }
 
-        /* Hero */
-        .hero-title { font-size: clamp(3rem, 12vw, 15rem); font-weight: 900; filter: blur(20px); transform: scale(1.5); opacity: 0; text-transform: uppercase; }
-
-        /* Stacking Section */
-        .stack-section { height: 400vh; background: #0a0a0a; }
-        .stack-container { width: 100%; height: 100vh; display: flex; align-items: center; justify-content: center; position: relative; }
-        .stack-card {
-            position: absolute; 
-            width: clamp(280px, 65vw, 850px); 
-            height: clamp(350px, 60vh, 550px); 
-            background: #1a1a1a; border: 1px solid #333; border-radius: 20px; 
-            display: flex; flex-direction: column; align-items: center; justify-content: center; 
-            padding: 2rem; text-align: center; box-shadow: 0 40px 100px rgba(0,0,0,0.5);
-            transform: translateY(110vh) rotate(5deg);
+        /* 2. Hero: Zoom Reveal */
+        .hero {
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+        .hero-title {
+            font-family: 'Syncopate', sans-serif;
+            font-size: 15vw;
+            letter-spacing: -0.05em;
+            text-transform: uppercase;
         }
 
-        /* Conveyor */
-        .conveyor-section { height: 200vh; background: var(--accent); color: #000; }
-        .conveyor-track { display: flex; gap: 5vw; padding: 0 50px; will-change: transform; }
-        .conveyor-item { font-size: clamp(3rem, 15vw, 12rem); font-weight: 900; white-space: nowrap; }
+        /* 3. The Stacking Section (Pinning Logic) */
+        .work-section {
+            position: relative;
+            background: #050505;
+            height: 100vh; /* Added explicit height */
+        }
 
-        /* Text Fill */
-        .text-fill-section { height: 200vh; background: #000; }
-        .text-fill { font-size: clamp(2rem, 6vw, 8vw); font-weight: 900; color: rgba(255,255,255,0.1); width: 90%; text-align: center; }
-        .text-fill span { color: var(--accent); display: inline-block; width: 0; overflow: hidden; white-space: nowrap; }
+        .panel {
+            height: 100vh;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: absolute;
+            top: 0;
+            left: 0;
+            visibility: hidden;
+            will-change: transform;
+        }
 
-        /* Audio Controls */
-        .mute-btn { position: fixed; bottom: 30px; right: 30px; z-index: 1000; background: none; border: 1px solid #fff; color: #fff; padding: 10px; cursor: pointer; font-size: 0.7rem; }
+        /* Added z-index for proper stacking */
+        #panel-1 { z-index: 1; }
+        #panel-2 { z-index: 2; }
+        #panel-3 { z-index: 3; }
+
+        .card {
+            width: 70vw;
+            height: 70vh;
+            background: #111;
+            border: 1px solid #222;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .card img {
+            width: 110%;
+            height: 110%;
+            object-fit: cover;
+            opacity: 0.5;
+            position: absolute;
+        }
+
+        .card h2 {
+            position: relative;
+            font-size: 8vw;
+            z-index: 2;
+            text-transform: uppercase;
+            pointer-events: none;
+        }
+
+        /* 4. The Conveyor (Horizontal Scroll) */
+        .conveyor-outer {
+            height: 300vh; /* Scroll distance */
+            background: var(--accent);
+        }
+        .conveyor-sticky {
+            height: 100vh;
+            position: sticky;
+            top: 0;
+            display: flex;
+            align-items: center;
+            overflow: hidden;
+        }
+        .conveyor-list {
+            display: flex;
+            white-space: nowrap;
+            /* Removed padding-left: 100vw - starts from left edge */
+        }
+        .conveyor-item {
+            font-size: 20vh;
+            font-weight: 900;
+            color: #000;
+            margin-right: 100px;
+            flex-shrink: 0; /* Prevent items from shrinking */
+        }
+
+        /* 5. Split Text Reveal */
+        .reveal-section {
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #fff;
+            color: #000;
+            overflow: hidden;
+        }
+        .reveal-text {
+            font-size: 10vw;
+            display: flex;
+            gap: 20px;
+        }
+        /* Set initial positions in CSS */
+        .word-left { transform: translateX(-100vw); }
+        .word-right { transform: translateX(100vw); }
+
+        .footer {
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
     </style>
 </head>
 <body>
 
-    <div id="overlay"><h2>CLICK TO START EXPERIENCE</h2></div>
-    <div class="scroll-progress"></div>
-    <button class="mute-btn" id="muteToggle">SOUND ON</button>
-
     <main>
         <section class="hero">
-            <h1 class="hero-title">AUDIO.VISUAL</h1>
+            <h1 class="hero-title">SCROLL</h1>
         </section>
 
-        <section class="stack-section">
-            <div class="stack-container">
-                <div class="stack-card card-1" style="z-index: 10;">
-                    <h2>01. SONIC</h2>
-                    <p style="margin-top: 1rem; opacity: 0.5;">Reactive sound triggers on scroll.</p>
+        <section class="work-section" id="work-trigger">
+            <div class="panel" id="panel-1">
+                <div class="card">
+                    <img src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=80&w=1000" alt="Design">
+                    <h2>DESIGN</h2>
                 </div>
-                <div class="stack-card card-2" style="z-index: 9;">
-                    <h2>02. TACTILE</h2>
-                    <p style="margin-top: 1rem; opacity: 0.5;">Hover for UI feedback sounds.</p>
+            </div>
+            <div class="panel" id="panel-2">
+                <div class="card">
+                    <img src="https://images.unsplash.com/photo-1633167606207-d840b5070fc2?auto=format&fit=crop&q=80&w=1000" alt="Motion">
+                    <h2>MOTION</h2>
                 </div>
-                <div class="stack-card card-3" style="z-index: 8;">
-                    <h2>03. FLOW</h2>
-                    <p style="margin-top: 1rem; opacity: 0.5;">Ambient drones fill the space.</p>
+            </div>
+            <div class="panel" id="panel-3">
+                <div class="card">
+                    <img src="https://images.unsplash.com/photo-1614850523296-d8c1af93d400?auto=format&fit=crop&q=80&w=1500" alt="Code">
+                    <h2>CODE</h2>
                 </div>
             </div>
         </section>
 
-        <section class="conveyor-section">
-            <div class="conveyor-track">
-                <div class="conveyor-item">CINEMATIC</div>
-                <div class="conveyor-item">—</div>
-                <div class="conveyor-item">AUDIO</div>
-                <div class="conveyor-item">—</div>
-                <div class="conveyor-item">IMMERSION</div>
+        <section class="conveyor-outer">
+            <div class="conveyor-sticky">
+                <div class="conveyor-list">
+                    <div class="conveyor-item">CINEMATIC</div>
+                    <div class="conveyor-item">PRECISION</div>
+                    <div class="conveyor-item">INTERACTIVE</div>
+                    <div class="conveyor-item">CINEMATIC</div> <!-- Duplicate for seamless loop -->
+                    <div class="conveyor-item">PRECISION</div>
+                    <div class="conveyor-item">INTERACTIVE</div>
+                </div>
             </div>
         </section>
 
-        <section class="text-fill-section">
-            <div class="text-fill">LISTEN TO THE MOTION <span>LISTEN TO THE MOTION</span></div>
+        <section class="reveal-section">
+            <div class="reveal-text">
+                <div class="word-left">CREATIVE</div>
+                <div class="word-right">SOUL</div>
+            </div>
         </section>
+
+        <footer class="footer">
+            <h2 id="outro-text">GENESIS 2026</h2>
+        </footer>
     </main>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
@@ -107,91 +208,103 @@
     <script>
         gsap.registerPlugin(ScrollTrigger);
 
-        // 1. Audio Engine Setup
-        const sfx = {
-            woosh: new Audio('https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3'),
-            hover: new Audio('https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3'),
-            drone: new Audio('https://www.soundhelix.com/examples/mp3/SoundHelix-Song-17.mp3')
-        };
-        sfx.woosh.volume = 0.3;
-        sfx.hover.volume = 0.2;
-        sfx.drone.volume = 0.1;
-        sfx.drone.loop = true;
-
-        let isMuted = false;
-        const overlay = document.getElementById('overlay');
+        // 1. Lenis Smooth Scrolling (Inertia setup)
+        const lenis = new Lenis({
+            duration: 1.5,
+            easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t))
+        });
         
-        overlay.addEventListener('click', () => {
-            overlay.style.display = 'none';
-            sfx.drone.play();
+        // Connect Lenis to GSAP ScrollTrigger
+        lenis.on('scroll', ScrollTrigger.update);
+        
+        gsap.ticker.add((time) => {
+            lenis.raf(time * 1000);
         });
+        
+        gsap.ticker.lagSmoothing(0);
 
-        document.getElementById('muteToggle').addEventListener('click', (e) => {
-            isMuted = !isMuted;
-            sfx.drone.muted = isMuted;
-            e.target.innerText = isMuted ? "SOUND OFF" : "SOUND ON";
-        });
-
-        function playSfx(type) {
-            if(!isMuted) {
-                sfx[type].currentTime = 0;
-                sfx[type].play();
-            }
-        }
-
-        // 2. Smooth Scroll
-        const lenis = new Lenis({ duration: 1.2, lerp: 0.1 });
-        function raf(time) { lenis.raf(time); requestAnimationFrame(raf); }
-        requestAnimationFrame(raf);
-
-        // 3. Hero Animation
+        // 2. Hero Action: Massive Zoom (Reduced scale for better performance)
         gsap.to(".hero-title", {
-            filter: "blur(0px)", scale: 1, opacity: 1,
-            scrollTrigger: { trigger: ".hero", start: "top top", end: "bottom top", scrub: true, pin: true }
-        });
-
-        // 4. Stacking Cards Timeline with Sound Triggers
-        const stackTl = gsap.timeline({
+            scale: 5, // Reduced from 50 to prevent rendering issues
+            opacity: 0,
             scrollTrigger: {
-                trigger: ".stack-section",
+                trigger: ".hero",
                 start: "top top",
                 end: "bottom top",
-                pin: true,
                 scrub: 1,
-                onUpdate: (self) => {
-                    // Trigger woosh sound when card is roughly halfway through its motion
-                    const p = self.progress;
-                    if ((p > 0.25 && p < 0.27) || (p > 0.55 && p < 0.57) || (p > 0.85 && p < 0.87)) {
-                        playSfx('woosh');
-                    }
-                }
+                pin: true
             }
         });
 
-        stackTl.to(".card-1", { y: 0, rotate: 0, duration: 1 })
-               .to(".card-2", { y: 0, rotate: -3, x: 10, duration: 1 }, "+=0.2")
-               .to(".card-1", { scale: 0.9, opacity: 0.4, duration: 1 }, "<")
-               .to(".card-3", { y: 0, rotate: 3, x: -10, duration: 1 }, "+=0.2")
-               .to(".card-2", { scale: 0.9, opacity: 0.4, duration: 1 }, "<");
-
-        // 5. Hover Sounds
-        document.querySelectorAll('.stack-card').forEach(card => {
-            card.addEventListener('mouseenter', () => playSfx('hover'));
+        // 3. The Master Pinning Sequence (Logical Card Stacking)
+        const workTl = gsap.timeline({
+            scrollTrigger: {
+                trigger: "#work-trigger",
+                start: "top top",
+                end: "+=3000",
+                scrub: 1,
+                pin: true,
+                anticipatePin: 1
+            }
         });
 
-        // 6. Conveyor
-        gsap.to(".conveyor-track", {
-            x: "-70%",
-            scrollTrigger: { trigger: ".conveyor-section", start: "top top", end: "bottom top", pin: true, scrub: 1 }
+        // Panel 1 - Fade in & Parallax Image
+        workTl.set("#panel-1", { visibility: "visible" })
+              .from("#panel-1 .card", { xPercent: -150, rotate: -20, duration: 1 })
+              .from("#panel-1 img", { scale: 1.5, duration: 1 }, "<");
+
+        // Panel 2 - Slides over Panel 1
+        workTl.set("#panel-2", { visibility: "visible" })
+              .from("#panel-2 .card", { xPercent: 150, rotate: 20, duration: 1 })
+              .to("#panel-1 .card", { scale: 0.8, opacity: 0.5, duration: 1 }, "<");
+
+        // Panel 3 - Slides up from bottom
+        workTl.set("#panel-3", { visibility: "visible" })
+              .from("#panel-3 .card", { yPercent: 150, duration: 1 })
+              .to("#panel-2 .card", { scale: 0.8, opacity: 0.5, duration: 1 }, "<");
+
+        // 4. Horizontal Conveyor Action (FIXED DIRECTION)
+        // Calculate total width for proper scrolling
+        const conveyorList = document.querySelector(".conveyor-list");
+        const conveyorWidth = conveyorList.scrollWidth;
+        
+        gsap.to(".conveyor-list", {
+            x: -conveyorWidth / 2, // Move left by half (since we duplicated items)
+            ease: "none",
+            scrollTrigger: {
+                trigger: ".conveyor-outer",
+                start: "top top",
+                end: "bottom bottom",
+                scrub: 1,
+                pin: ".conveyor-sticky" // Pin the sticky container instead
+            }
         });
 
-        // 7. Text Fill
-        gsap.to(".text-fill span", {
-            width: "100%",
-            scrollTrigger: { trigger: ".text-fill-section", start: "top top", end: "bottom top", pin: true, scrub: 1 }
+        // 5. Split Reveal Action (FIXED)
+        const revealTl = gsap.timeline({
+            scrollTrigger: {
+                trigger: ".reveal-section",
+                start: "top 80%",
+                end: "center center",
+                scrub: 1
+            }
+        });
+        
+        revealTl.to(".word-left", { x: "100vw", ease: "none" }, 0)
+                .to(".word-right", { x: "-100vw", ease: "none" }, 0);
+
+        // 6. Final Letter Spacing Action
+        gsap.from("#outro-text", {
+            letterSpacing: "-1em",
+            opacity: 0,
+            scrollTrigger: {
+                trigger: ".footer",
+                start: "top bottom",
+                end: "bottom bottom",
+                scrub: 1
+            }
         });
 
-        window.addEventListener('resize', () => ScrollTrigger.refresh());
     </script>
 </body>
 </html>
