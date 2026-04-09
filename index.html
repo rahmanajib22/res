@@ -1,332 +1,904 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Cinematic Scroll Portfolio</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
-  <script src="https://unpkg.com/lenis@1.1.18/dist/lenis.min.js"></script>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
-  
-  <style>
-    :root {
-      --bg: #08080a;
-      --surface: #111114;
-      --surface-alt: #16161a;
-      --text: #f2f2f5;
-      --text-muted: #888890;
-      --accent: #5e47d9;
-      --accent-glow: rgba(94, 71, 217, 0.25);
-      --radius: 14px;
-      --ease-cinematic: cubic-bezier(0.22, 1, 0.36, 1);
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cinematic Scroll Experience</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/studio-freight/lenis@1.0.29/bundled/lenis.min.js"></script>
 
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    html.lenis, body { height: auto; overflow-x: hidden; }
-    body {
-      background: var(--bg);
-      color: var(--text);
-      font-family: 'Inter', system-ui, sans-serif;
-      line-height: 1.4;
-      -webkit-font-smoothing: antialiased;
-    }
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Space+Grotesk:wght@300;500;700&display=swap');
 
-    /* Layout Utilities */
-    .container { max-width: 1400px; margin: 0 auto; padding: 0 clamp(1.5rem, 5vw, 5rem); }
-    section { position: relative; min-height: 100vh; display: flex; flex-direction: column; justify-content: center; overflow: hidden; }
-    h2 { font-size: clamp(2.5rem, 6vw, 4.5rem); font-weight: 800; letter-spacing: -0.03em; line-height: 1; margin-bottom: 2rem; }
-    p { color: var(--text-muted); max-width: 60ch; font-size: clamp(1rem, 1.2vw, 1.25rem); }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        html, body {
+            overflow-x: hidden;
+            background: #050505;
+            color: #fff;
+            font-family: 'Inter', sans-serif;
+        }
 
-    /* Card System (Scroll vs Hover Isolation) */
-    .card-wrap { will-change: transform; perspective: 1200px; }
-    .card {
-      background: var(--surface);
-      border: 1px solid rgba(255,255,255,0.06);
-      border-radius: var(--radius);
-      padding: clamp(1.5rem, 3vw, 2.5rem);
-      display: flex; flex-direction: column; gap: 1rem;
-      transition: transform 0.4s var(--ease-cinematic), box-shadow 0.4s var(--ease-cinematic), border-color 0.4s;
-      height: 100%;
-    }
-    .card:hover { transform: translateY(-6px) scale(1.015); box-shadow: 0 15px 35px rgba(0,0,0,0.5); border-color: var(--accent); }
-    .card-tag { background: rgba(94,71,217,0.15); color: var(--accent); padding: 0.35rem 0.9rem; border-radius: 99px; font-size: 0.75rem; font-weight: 600; width: fit-content; }
-    .card h3 { font-size: 1.4rem; font-weight: 700; }
+        html.lenis, html.lenis body { height: auto; }
+        .lenis.lenis-smooth { scroll-behavior: auto !important; }
 
-    /* 1. Hero */
-    .hero { align-items: center; text-align: center; padding-top: 15vh; }
-    .hero-title { font-size: clamp(4rem, 14vw, 10rem); font-weight: 800; letter-spacing: -0.05em; line-height: 0.85; background: linear-gradient(to bottom right, #fff 0%, #666 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; will-change: transform, opacity; }
-    .scroll-indicator { position: absolute; bottom: 8vh; color: var(--text-muted); font-size: 0.8rem; letter-spacing: 0.1em; text-transform: uppercase; }
+        /* 1. VELOCITY SKEW EFFECT */
+        .velocity-skew {
+            will-change: transform;
+            transition: transform 0.1s linear;
+        }
 
-    /* 2. Side Slide Cards */
-    .side-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 3rem; padding: 10vh 0; }
-    .side-card-wrap { opacity: 0; } /* Initial state handled by GSAP */
+        /* 2. TEXT REVEAL MASK */
+        .text-reveal-container {
+            overflow: hidden;
+            position: relative;
+        }
+        .text-reveal-mask {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #050505;
+            transform-origin: right;
+        }
 
-    /* 3. Conveyor */
-    .conveyor-sec { background: var(--surface); padding: 10vh 0; }
-    .track { display: flex; gap: 2rem; padding: 0 clamp(1.5rem, 5vw, 5rem); width: max-content; }
-    .conveyor-card { width: clamp(260px, 22vw, 380px); aspect-ratio: 3/4; background: var(--bg); border-radius: var(--radius); display: flex; align-items: center; justify-content: center; font-weight: 600; border: 1px solid rgba(255,255,255,0.05); position: relative; overflow: hidden; }
-    .conveyor-card::after { content: ''; position: absolute; inset: 0; background: radial-gradient(circle at 50% 0%, var(--accent-glow), transparent 70%); opacity: 0; transition: opacity 0.5s; }
-    .conveyor-card:hover::after { opacity: 1; }
+        /* 3. 3D CARD PERSPECTIVE */
+        .perspective-container {
+            perspective: 1000px;
+            transform-style: preserve-3d;
+        }
+        .card-3d {
+            transform-style: preserve-3d;
+            backface-visibility: hidden;
+        }
 
-    /* 4. Split Convergence */
-    .split { display: flex; height: 100vh; position: relative; }
-    .split-panel { flex: 1; display: flex; align-items: center; justify-content: center; padding: 2rem; background: var(--surface); will-change: transform; }
-    .split-left { border-right: 1px solid rgba(255,255,255,0.05); }
-    .split-right { background: var(--surface-alt); }
+        /* 4. LIQUID MORPH SHAPES */
+        .blob {
+            border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%;
+            animation: blob-morph 8s ease-in-out infinite;
+        }
+        @keyframes blob-morph {
+            0%, 100% { border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%; }
+            50% { border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; }
+        }
 
-    /* 5. Stack Deck */
-    .stack { position: relative; height: 100vh; display: flex; align-items: center; justify-content: center; }
-    .deck-card { position: absolute; width: clamp(300px, 28vw, 450px); background: var(--surface); border-radius: var(--radius); padding: 2rem; border: 1px solid rgba(255,255,255,0.06); box-shadow: 0 20px 60px rgba(0,0,0,0.4); }
+        /* 5. GLITCH TEXT */
+        .glitch-text {
+            position: relative;
+            display: inline-block;
+        }
+        .glitch-text::before,
+        .glitch-text::after {
+            content: attr(data-text);
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+        }
 
-    /* 6. Parallax Grid */
-    .p-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2rem; padding: 10vh 0; }
-    .p-cell { background: var(--surface); border-radius: var(--radius); aspect-ratio: 1; display: flex; align-items: center; justify-content: center; font-weight: 600; will-change: transform; border: 1px solid rgba(255,255,255,0.05); }
+        /* 6. INFINITE MARQUEE */
+        .marquee-track {
+            display: flex;
+            width: fit-content;
+            will-change: transform;
+        }
 
-    /* 7. Clip Reveal */
-    .clip { display: flex; align-items: center; gap: 4rem; flex-wrap: wrap; }
-    .clip-img { width: clamp(300px, 40vw, 600px); aspect-ratio: 4/3; background: linear-gradient(135deg, #222, #333); border-radius: var(--radius); position: relative; overflow: hidden; }
-    .clip-mask { position: absolute; inset: 0; background: var(--bg); will-change: clip-path; }
-    .clip-content { flex: 1; min-width: 300px; }
+        /* 7. CLIP PATH REVEAL */
+        .clip-reveal {
+            clip-path: inset(100% 0 0 0);
+        }
 
-    /* 8. Z-Tunnel */
-    .tunnel { position: relative; height: 100vh; display: flex; align-items: center; justify-content: center; perspective: 1000px; }
-    .tunnel-card { position: absolute; width: 280px; height: 380px; background: var(--surface); border-radius: var(--radius); border: 1px solid rgba(255,255,255,0.08); display: flex; align-items: center; justify-content: center; font-weight: 600; will-change: transform, opacity, filter; }
+        /* 8. STICKY STACKING CARDS */
+        .stack-card {
+            position: sticky;
+            top: 10vh;
+            height: 80vh;
+            will-change: transform, filter;
+        }
 
-    /* 9. Unmask Curtain */
-    .unmask { position: relative; height: 100vh; overflow: hidden; }
-    .unmask-bg { position: absolute; inset: 0; background: var(--surface); display: flex; align-items: center; justify-content: center; }
-    .curtain { position: absolute; bottom: 0; left: 0; right: 0; height: 100%; background: var(--bg); z-index: 2; will-change: transform; }
-    .unmask-content { position: relative; z-index: 3; padding: 4rem; text-align: center; opacity: 0.3; transition: opacity 0.4s; }
+        /* 9. HORIZONTAL VELOCITY SLIDER */
+        .velocity-slider {
+            display: flex;
+            gap: 2rem;
+            will-change: transform;
+        }
 
-    /* 10. Contact */
-    .contact { align-items: center; text-align: center; background: var(--surface); }
-    .contact h2 { margin-bottom: 1rem; }
-    .btn { display: inline-block; padding: 1rem 2.5rem; background: var(--accent); color: #fff; font-weight: 600; border-radius: 99px; text-decoration: none; margin-top: 2rem; transition: transform 0.3s, box-shadow 0.3s; }
-    .btn:hover { transform: translateY(-4px); box-shadow: 0 12px 30px rgba(94,71,217,0.4); }
+        /* 10. SVG PATH DRAW */
+        .draw-path {
+            stroke-dasharray: 1000;
+            stroke-dashoffset: 1000;
+        }
 
-    /* Responsive */
-    @media (max-width: 768px) {
-      .side-grid, .p-grid { grid-template-columns: 1fr; }
-      .split { flex-direction: column; height: auto; min-height: 100vh; }
-      .clip { flex-direction: column; }
-      .track { gap: 1.5rem; }
-    }
-  </style>
+        /* NOISE OVERLAY */
+        .noise {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            opacity: 0.03;
+            z-index: 9999;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+        }
+
+        /* CUSTOM CURSOR */
+        .cursor {
+            position: fixed;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #fff;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 10000;
+            mix-blend-mode: difference;
+            transition: transform 0.15s ease, width 0.2s, height 0.2s;
+        }
+        .cursor.hover {
+            width: 60px;
+            height: 60px;
+            background: rgba(255,255,255,0.1);
+        }
+
+        /* SCROLLBAR HIDE */
+        ::-webkit-scrollbar { width: 0; background: transparent; }
+
+        .font-display { font-family: 'Space Grotesk', sans-serif; }
+    </style>
 </head>
 <body>
 
-  <main>
-    <!-- 1. Hero Parallax -->
-    <section class="hero">
-      <h1 class="hero-title">Scroll<br>Driven</h1>
-      <div class="scroll-indicator">↓ Scroll to animate</div>
+    <div class="noise"></div>
+    <div class="cursor hidden md:block"></div>
+
+    <!-- NAVIGATION -->
+    <nav class="fixed top-0 w-full z-50 px-6 py-6 mix-blend-difference">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <div class="font-display font-bold text-xl tracking-tighter hover-trigger">STUDIO</div>
+            <div class="hidden md:flex gap-8 text-sm font-medium tracking-widest">
+                <a href="#work" class="hover-trigger opacity-70 hover:opacity-100 transition-opacity">WORK</a>
+                <a href="#lab" class="hover-trigger opacity-70 hover:opacity-100 transition-opacity">LAB</a>
+                <a href="#contact" class="hover-trigger opacity-70 hover:opacity-100 transition-opacity">CONTACT</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- SECTION 1: VELOCITY-AWARE HERO -->
+    <!-- Elements skew based on scroll velocity -->
+    <section class="relative min-h-[200vh] bg-neutral-900 overflow-hidden" id="hero">
+        <div class="sticky top-0 h-screen flex items-center justify-center overflow-hidden">
+            <div class="absolute inset-0 z-0">
+                <div class="absolute inset-0 bg-gradient-to-b from-purple-900/20 via-transparent to-black"></div>
+            </div>
+            
+            <div class="relative z-10 text-center px-6 max-w-6xl mx-auto velocity-skew" id="hero-content">
+                <h1 class="font-display text-7xl md:text-9xl font-bold leading-none tracking-tighter mb-8">
+                    <span class="block overflow-hidden">
+                        <span class="hero-line inline-block">VELOCITY</span>
+                    </span>
+                    <span class="block overflow-hidden">
+                        <span class="hero-line inline-block text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-600">DRIVEN</span>
+                    </span>
+                </h1>
+                <p class="hero-sub text-lg md:text-2xl text-neutral-400 max-w-2xl mx-auto font-light">
+                    Scroll fast. Scroll slow. The experience adapts to your momentum.
+                </p>
+            </div>
+
+            <div class="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 opacity-60">
+                <span class="text-xs tracking-widest animate-pulse">SCROLL FAST FOR EFFECT</span>
+                <div class="w-px h-12 bg-gradient-to-b from-white to-transparent"></div>
+            </div>
+        </div>
     </section>
 
-    <!-- 2. Side Slide Cards -->
-    <section class="container">
-      <div class="side-grid">
-        <div class="card-wrap side-card-wrap"><div class="card"><span class="card-tag">React</span><h3>Nova Analytics</h3><p>Real-time data visualization with fluid state management.</p></div></div>
-        <div class="card-wrap side-card-wrap"><div class="card"><span class="card-tag">WebGL</span><h3>Aether Space</h3><p>Immersive 3D environments with dynamic lighting.</p></div></div>
-        <div class="card-wrap side-card-wrap"><div class="card"><span class="card-tag">GSAP</span><h3>Chrono Flow</h3><p>Scroll-driven storytelling timeline engine.</p></div></div>
-      </div>
+    <!-- SECTION 2: MASKED TEXT REVEAL -->
+    <!-- Text reveals from behind a sliding mask tied to scroll -->
+    <section class="relative min-h-[150vh] bg-black flex items-center justify-center py-32" id="reveal">
+        <div class="max-w-5xl mx-auto px-6">
+            <div class="space-y-8">
+                <div class="text-reveal-container">
+                    <h2 class="font-display text-5xl md:text-8xl font-bold leading-tight reveal-text" data-delay="0">
+                        EVERY SCROLL
+                    </h2>
+                    <div class="text-reveal-mask bg-black"></div>
+                </div>
+                <div class="text-reveal-container">
+                    <h2 class="font-display text-5xl md:text-8xl font-bold leading-tight reveal-text text-neutral-400" data-delay="0.2">
+                        REVEALS A
+                    </h2>
+                    <div class="text-reveal-mask bg-black"></div>
+                </div>
+                <div class="text-reveal-container">
+                    <h2 class="font-display text-5xl md:text-8xl font-bold leading-tight reveal-text text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-600" data-delay="0.4">
+                        NEW STORY
+                    </h2>
+                    <div class="text-reveal-mask bg-black"></div>
+                </div>
+            </div>
+        </div>
     </section>
 
-    <!-- 3. Conveyor Belt -->
-    <section class="conveyor-sec">
-      <div class="container" style="margin-bottom: 3rem;"><h2>Expertise</h2><p>Horizontal motion controlled by vertical scroll. Pinned for cinematic pacing.</p></div>
-      <div class="track">
-        <div class="conveyor-card">UI Systems</div>
-        <div class="conveyor-card">Creative Dev</div>
-        <div class="conveyor-card">Motion Design</div>
-        <div class="conveyor-card">Performance</div>
-        <div class="conveyor-card">Prototyping</div>
-        <div class="conveyor-card">Architecture</div>
-        <div class="conveyor-card">WebGL</div>
-        <div class="conveyor-card">Interaction</div>
-      </div>
+    <!-- SECTION 3: 3D CARD TUNNEL -->
+    <!-- Cards rotate in 3D space as you scroll through -->
+    <section class="relative min-h-[300vh] bg-neutral-900 perspective-container" id="tunnel">
+        <div class="sticky top-0 h-screen flex items-center justify-center overflow-hidden" style="perspective: 1000px;">
+            <div class="absolute top-8 left-8 z-20">
+                <p class="text-sm tracking-widest text-neutral-500">3D TUNNEL // SCROLL TO NAVIGATE</p>
+            </div>
+            
+            <div class="relative w-full max-w-6xl mx-auto px-6 h-full flex items-center justify-center">
+                <!-- Card 1 - Furthest -->
+                <div class="tunnel-card absolute w-full max-w-2xl h-[60vh] bg-gradient-to-br from-purple-600 to-blue-600 rounded-3xl p-12 flex flex-col justify-between card-3d hover-trigger" data-depth="1">
+                    <div class="text-6xl font-display font-bold opacity-30">01</div>
+                    <div>
+                        <h3 class="text-4xl font-bold mb-4">Deep Space</h3>
+                        <p class="text-lg opacity-80">Navigate through layered dimensions</p>
+                    </div>
+                </div>
+                
+                <!-- Card 2 - Middle -->
+                <div class="tunnel-card absolute w-full max-w-2xl h-[60vh] bg-gradient-to-br from-pink-600 to-orange-600 rounded-3xl p-12 flex flex-col justify-between card-3d hover-trigger" data-depth="2">
+                    <div class="text-6xl font-display font-bold opacity-30">02</div>
+                    <div>
+                        <h3 class="text-4xl font-bold mb-4">Neon Dreams</h3>
+                        <p class="text-lg opacity-80">Where light meets motion</p>
+                    </div>
+                </div>
+                
+                <!-- Card 3 - Closest -->
+                <div class="tunnel-card absolute w-full max-w-2xl h-[60vh] bg-gradient-to-br from-emerald-600 to-cyan-600 rounded-3xl p-12 flex flex-col justify-between card-3d hover-trigger" data-depth="3">
+                    <div class="text-6xl font-display font-bold opacity-30">03</div>
+                    <div>
+                        <h3 class="text-4xl font-bold mb-4">Digital Flux</h3>
+                        <p class="text-lg opacity-80">Constant transformation</p>
+                    </div>
+                </div>
+            </div>
+        </div>
     </section>
 
-    <!-- 4. Split Convergence -->
-    <section class="split">
-      <div class="split-panel split-left"><h2>Design<br>Systems</h2><p style="margin-top:1rem">Scalable component libraries built for growth.</p></div>
-      <div class="split-panel split-right"><h2>Engineering<br>Excellence</h2><p style="margin-top:1rem">Optimized pipelines for high-performance delivery.</p></div>
+    <!-- SECTION 4: LIQUID MORPH GRID -->
+    <!-- Organic shapes that morph and reposition based on scroll -->
+    <section class="relative min-h-[200vh] bg-black py-32 overflow-hidden" id="morph">
+        <div class="sticky top-0 h-screen flex items-center justify-center">
+            <div class="absolute inset-0 flex items-center justify-center">
+                <div class="blob absolute w-96 h-96 bg-purple-600/30 blur-3xl morph-blob-1"></div>
+                <div class="blob absolute w-80 h-80 bg-pink-600/30 blur-3xl morph-blob-2"></div>
+                <div class="blob absolute w-72 h-72 bg-blue-600/30 blur-3xl morph-blob-3"></div>
+            </div>
+            
+            <div class="relative z-10 text-center max-w-4xl mx-auto px-6">
+                <h2 class="font-display text-6xl md:text-8xl font-bold mb-8 morph-title">ORGANIC</h2>
+                <p class="text-xl text-neutral-400 morph-text">Forms that breathe with your scroll rhythm</p>
+            </div>
+        </div>
     </section>
 
-    <!-- 5. Stack Deck -->
-    <section class="stack">
-      <div class="deck-card"><span class="card-tag">Case 01</span><h3>Orbit CMS</h3><p>Headless architecture with drag-and-drop builder.</p></div>
-      <div class="deck-card"><span class="card-tag">Case 02</span><h3>Velo UI</h3><p>Design system for rapid prototyping.</p></div>
-      <div class="deck-card"><span class="card-tag">Case 03</span><h3>Prism Engine</h3><p>Real-time shader playground.</p></div>
+    <!-- SECTION 5: GLITCH SCROLL TRIGGER -->
+    <!-- Text glitches and shifts as you scroll past -->
+    <section class="relative min-h-[150vh] bg-neutral-900 flex items-center justify-center" id="glitch">
+        <div class="text-center px-6">
+            <h2 class="glitch-text font-display text-6xl md:text-9xl font-bold tracking-tighter" data-text="SYSTEM">
+                SYSTEM
+            </h2>
+            <h2 class="glitch-text font-display text-6xl md:text-9xl font-bold tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-orange-500" data-text="OVERLOAD">
+                OVERLOAD
+            </h2>
+            <p class="mt-8 text-neutral-500 tracking-widest text-sm">SCROLL TO CORRUPT // REVERSE TO REPAIR</p>
+        </div>
     </section>
 
-    <!-- 6. Parallax Grid -->
-    <section class="container">
-      <div class="p-grid">
-        <div class="p-cell">01</div><div class="p-cell">02</div><div class="p-cell">03</div>
-        <div class="p-cell">04</div><div class="p-cell">05</div><div class="p-cell">06</div>
-      </div>
+    <!-- SECTION 6: INFINITE VELOCITY MARQUEE -->
+    <!-- Speed changes based on scroll velocity, direction reverses when scrolling up -->
+    <section class="relative min-h-[100vh] bg-black py-32 overflow-hidden" id="marquee">
+        <div class="space-y-12">
+            <div class="marquee-container overflow-hidden">
+                <div class="marquee-track" id="marquee-1">
+                    <span class="font-display text-8xl md:text-[12rem] font-bold text-neutral-800 whitespace-nowrap px-8">CREATIVE</span>
+                    <span class="font-display text-8xl md:text-[12rem] font-bold text-neutral-800 whitespace-nowrap px-8">CREATIVE</span>
+                    <span class="font-display text-8xl md:text-[12rem] font-bold text-neutral-800 whitespace-nowrap px-8">CREATIVE</span>
+                    <span class="font-display text-8xl md:text-[12rem] font-bold text-neutral-800 whitespace-nowrap px-8">CREATIVE</span>
+                </div>
+            </div>
+            <div class="marquee-container overflow-hidden">
+                <div class="marquee-track" id="marquee-2">
+                    <span class="font-display text-8xl md:text-[12rem] font-bold text-transparent stroke-text whitespace-nowrap px-8" style="-webkit-text-stroke: 2px #333;">DEVELOPER</span>
+                    <span class="font-display text-8xl md:text-[12rem] font-bold text-transparent stroke-text whitespace-nowrap px-8" style="-webkit-text-stroke: 2px #333;">DEVELOPER</span>
+                    <span class="font-display text-8xl md:text-[12rem] font-bold text-transparent stroke-text whitespace-nowrap px-8" style="-webkit-text-stroke: 2px #333;">DEVELOPER</span>
+                    <span class="font-display text-8xl md:text-[12rem] font-bold text-transparent stroke-text whitespace-nowrap px-8" style="-webkit-text-stroke: 2px #333;">DEVELOPER</span>
+                </div>
+            </div>
+        </div>
     </section>
 
-    <!-- 7. Clip Reveal -->
-    <section class="container clip">
-      <div class="clip-img">
-        <div class="clip-mask"></div>
-      </div>
-      <div class="clip-content">
-        <h2>Precision<br>Masking</h2>
-        <p>Content reveals through dynamic clip-path boundaries tied directly to scroll position.</p>
-      </div>
+    <!-- SECTION 7: CLIP-PATH PORTFOLIO REVEAL -->
+    <!-- Images reveal from bottom to top with clip-path -->
+    <section class="relative min-h-[250vh] bg-neutral-900" id="work">
+        <div class="sticky top-0 h-screen overflow-hidden">
+            <div class="absolute top-8 left-8 z-20">
+                <h2 class="font-display text-4xl font-bold">SELECTED WORK</h2>
+                <p class="text-sm text-neutral-500 mt-2">SCROLL TO REVEAL PROJECTS</p>
+            </div>
+            
+            <div class="h-full flex items-center justify-center px-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-6xl w-full">
+                    <div class="clip-item relative aspect-[4/5] bg-neutral-800 rounded-2xl overflow-hidden clip-reveal hover-trigger" data-speed="1">
+                        <div class="absolute inset-0 bg-gradient-to-br from-purple-600 to-blue-600"></div>
+                        <div class="absolute inset-0 flex items-center justify-center">
+                            <span class="text-6xl font-display font-bold text-white/20">01</span>
+                        </div>
+                        <div class="absolute bottom-0 left-0 right-0 p-8 bg-gradient-to-t from-black/80 to-transparent">
+                            <h3 class="text-2xl font-bold">Project Alpha</h3>
+                            <p class="text-neutral-400">WebGL Experience</p>
+                        </div>
+                    </div>
+                    
+                    <div class="clip-item relative aspect-[4/5] bg-neutral-800 rounded-2xl overflow-hidden clip-reveal hover-trigger" data-speed="1.2" style="margin-top: 10vh;">
+                        <div class="absolute inset-0 bg-gradient-to-br from-pink-600 to-orange-600"></div>
+                        <div class="absolute inset-0 flex items-center justify-center">
+                            <span class="text-6xl font-display font-bold text-white/20">02</span>
+                        </div>
+                        <div class="absolute bottom-0 left-0 right-0 p-8 bg-gradient-to-t from-black/80 to-transparent">
+                            <h3 class="text-2xl font-bold">Project Beta</h3>
+                            <p class="text-neutral-400">Interactive Design</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </section>
 
-    <!-- 8. Z-Tunnel -->
-    <section class="tunnel">
-      <div class="tunnel-card">Depth 01</div>
-      <div class="tunnel-card">Depth 02</div>
-      <div class="tunnel-card">Depth 03</div>
+    <!-- SECTION 8: STACKING CARDS WITH SCALE -->
+    <!-- Cards stack on top of each other as you scroll, with scale and brightness changes -->
+    <section class="relative bg-black" id="lab" style="height: 400vh;">
+        <div class="sticky top-0 h-screen overflow-hidden">
+            <div class="absolute top-8 left-8 z-50">
+                <h2 class="font-display text-4xl font-bold">THE LAB</h2>
+            </div>
+            
+            <!-- Card 1 -->
+            <div class="stack-card absolute inset-x-6 top-[10vh] mx-auto max-w-5xl bg-gradient-to-br from-violet-900 to-purple-900 rounded-3xl p-12 flex flex-col justify-between hover-trigger" data-index="0">
+                <div class="text-8xl font-display font-bold text-white/10">01</div>
+                <div>
+                    <h3 class="text-4xl md:text-6xl font-bold mb-4">Generative Art</h3>
+                    <p class="text-xl text-white/70 max-w-2xl">Algorithmic creations that evolve with every interaction</p>
+                </div>
+            </div>
+            
+            <!-- Card 2 -->
+            <div class="stack-card absolute inset-x-6 top-[10vh] mx-auto max-w-5xl bg-gradient-to-br from-emerald-900 to-teal-900 rounded-3xl p-12 flex flex-col justify-between hover-trigger" data-index="1">
+                <div class="text-8xl font-display font-bold text-white/10">02</div>
+                <div>
+                    <h3 class="text-4xl md:text-6xl font-bold mb-4">Motion Systems</h3>
+                    <p class="text-xl text-white/70 max-w-2xl">Physics-based animations that feel natural and responsive</p>
+                </div>
+            </div>
+            
+            <!-- Card 3 -->
+            <div class="stack-card absolute inset-x-6 top-[10vh] mx-auto max-w-5xl bg-gradient-to-br from-orange-900 to-red-900 rounded-3xl p-12 flex flex-col justify-between hover-trigger" data-index="2">
+                <div class="text-8xl font-display font-bold text-white/10">03</div>
+                <div>
+                    <h3 class="text-4xl md:text-6xl font-bold mb-4">Spatial Audio</h3>
+                    <p class="text-xl text-white/70 max-w-2xl">3D soundscapes that respond to scroll position</p>
+                </div>
+            </div>
+            
+            <!-- Card 4 -->
+            <div class="stack-card absolute inset-x-6 top-[10vh] mx-auto max-w-5xl bg-gradient-to-br from-blue-900 to-cyan-900 rounded-3xl p-12 flex flex-col justify-between hover-trigger" data-index="3">
+                <div class="text-8xl font-display font-bold text-white/10">04</div>
+                <div>
+                    <h3 class="text-4xl md:text-6xl font-bold mb-4">WebGL Shaders</h3>
+                    <p class="text-xl text-white/70 max-w-2xl">GPU-accelerated visual effects in real-time</p>
+                </div>
+            </div>
+        </div>
     </section>
 
-    <!-- 9. Unmask Curtain -->
-    <section class="unmask">
-      <div class="unmask-bg"><h2>Next Phase</h2></div>
-      <div class="curtain"></div>
-      <div class="unmask-content">
-        <h2>Ready to Deploy</h2>
-        <p style="margin:1rem auto">Scroll clears the curtain. Reversing scrolls it back.</p>
-      </div>
+    <!-- SECTION 9: HORIZONTAL VELOCITY SLIDER -->
+    <!-- Horizontal movement speed increases with scroll velocity -->
+    <section class="relative min-h-[200vh] bg-neutral-900 py-32 overflow-hidden" id="velocity">
+        <div class="sticky top-0 h-screen flex flex-col justify-center">
+            <div class="mb-12 px-6">
+                <h2 class="font-display text-4xl md:text-6xl font-bold mb-4">VELOCITY SLIDER</h2>
+                <p class="text-neutral-500">Scroll faster to accelerate horizontal movement</p>
+            </div>
+            
+            <div class="overflow-hidden">
+                <div class="velocity-slider px-6" id="velocity-track">
+                    <div class="flex-shrink-0 w-[60vw] md:w-[30vw] aspect-video bg-gradient-to-br from-purple-600 to-pink-600 rounded-2xl p-8 flex items-end hover-trigger">
+                        <span class="text-4xl font-bold">SLIDE 01</span>
+                    </div>
+                    <div class="flex-shrink-0 w-[60vw] md:w-[30vw] aspect-video bg-gradient-to-br from-pink-600 to-orange-600 rounded-2xl p-8 flex items-end hover-trigger">
+                        <span class="text-4xl font-bold">SLIDE 02</span>
+                    </div>
+                    <div class="flex-shrink-0 w-[60vw] md:w-[30vw] aspect-video bg-gradient-to-br from-orange-600 to-yellow-600 rounded-2xl p-8 flex items-end hover-trigger">
+                        <span class="text-4xl font-bold">SLIDE 03</span>
+                    </div>
+                    <div class="flex-shrink-0 w-[60vw] md:w-[30vw] aspect-video bg-gradient-to-br from-yellow-600 to-green-600 rounded-2xl p-8 flex items-end hover-trigger">
+                        <span class="text-4xl font-bold">SLIDE 04</span>
+                    </div>
+                    <div class="flex-shrink-0 w-[60vw] md:w-[30vw] aspect-video bg-gradient-to-br from-green-600 to-cyan-600 rounded-2xl p-8 flex items-end hover-trigger">
+                        <span class="text-4xl font-bold">SLIDE 05</span>
+                    </div>
+                </div>
+            </div>
+        </div>
     </section>
 
-    <!-- 10. Contact -->
-    <section class="contact">
-      <div class="container">
-        <h2 class="contact-title">Let's Create</h2>
-        <p>Next-generation interactive experiences built on scroll physics.</p>
-        <a href="#" class="btn contact-btn">Start a Project</a>
-      </div>
+    <!-- SECTION 10: SVG PATH DRAW & CONTACT -->
+    <!-- SVG lines draw themselves as you scroll -->
+    <section class="relative min-h-[150vh] bg-black" id="contact">
+        <div class="sticky top-0 h-screen flex items-center justify-center overflow-hidden">
+            <svg class="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 100 100" preserveAspectRatio="none">
+                <path class="draw-path" id="draw-line-1" d="M 0 50 Q 25 30 50 50 T 100 50" stroke="rgba(147, 51, 234, 0.3)" stroke-width="0.2" fill="none"/>
+                <path class="draw-path" id="draw-line-2" d="M 0 60 Q 25 80 50 60 T 100 60" stroke="rgba(236, 72, 153, 0.3)" stroke-width="0.2" fill="none"/>
+                <path class="draw-path" id="draw-line-3" d="M 50 0 L 50 100" stroke="rgba(59, 130, 246, 0.2)" stroke-width="0.1" fill="none"/>
+            </svg>
+            
+            <div class="relative z-10 text-center px-6 max-w-4xl mx-auto">
+                <h2 class="font-display text-5xl md:text-8xl font-bold mb-8 contact-title">LET'S CONNECT</h2>
+                <p class="text-xl text-neutral-400 mb-12 contact-sub">The journey ends here. Or does it begin?</p>
+                
+                <a href="mailto:hello@studio.com" class="inline-flex items-center gap-4 px-8 py-4 bg-white text-black rounded-full font-medium text-lg hover-trigger hover:scale-105 transition-transform">
+                    <span>Start Project</span>
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
+                </a>
+                
+                <div class="mt-24 pt-8 border-t border-neutral-800 flex flex-col md:flex-row justify-between items-center gap-4 text-neutral-600 text-sm">
+                    <p>&copy; 2024 Studio. All rights reserved.</p>
+                    <div class="flex gap-6">
+                        <a href="#" class="hover:text-white transition-colors hover-trigger">Twitter</a>
+                        <a href="#" class="hover:text-white transition-colors hover-trigger">LinkedIn</a>
+                        <a href="#" class="hover:text-white transition-colors hover-trigger">GitHub</a>
+                    </div>
+                </div>
+            </div>
+        </div>
     </section>
-  </main>
 
-  <script>
-    // 1. Lenis Setup (Cinematic Smooth Scroll)
-    const lenis = new Lenis({
-      duration: 1.1,
-      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-      smoothWheel: true,
-      wheelMultiplier: 1.2 // Slightly slower scroll for better readability
-    });
+    <script>
+        // Initialize Lenis with velocity tracking
+        const lenis = new Lenis({
+            duration: 1.2,
+            easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+            smooth: true,
+            smoothTouch: false
+        });
 
-    lenis.on('scroll', ScrollTrigger.update);
-    gsap.ticker.add((time) => lenis.raf(time * 1000));
-    gsap.ticker.lagSmoothing(0);
+        // Track scroll velocity
+        let scrollVelocity = 0;
+        let lastScroll = 0;
 
-    gsap.registerPlugin(ScrollTrigger);
+        lenis.on('scroll', ({ velocity }) => {
+            scrollVelocity = velocity;
+            ScrollTrigger.update();
+        });
 
-    // 2. Hero Parallax
-    gsap.to('.hero-title', {
-      y: 120, scale: 0.85, opacity: 0.2,
-      ease: 'none',
-      scrollTrigger: { trigger: '.hero', start: 'top top', end: 'bottom top', scrub: 1.2 }
-    });
+        gsap.ticker.add((time) => {
+            lenis.raf(time * 1000);
+        });
 
-    // 3. Side Slide Cards (Paced for Readability)
-    document.querySelectorAll('.side-card-wrap').forEach((wrap, i) => {
-      const isLeft = i % 2 === 0;
-      gsap.set(wrap, { x: isLeft ? -150 : 150, opacity: 0 });
-      gsap.to(wrap, {
-        x: 0, opacity: 1,
-        ease: 'power3.out',
-        scrollTrigger: {
-          trigger: wrap,
-          start: 'top 80%',
-          end: 'bottom 20%',
-          scrub: 1.5 // Cinematic inertia, slower = easier to read
+        gsap.ticker.lagSmoothing(0);
+        gsap.registerPlugin(ScrollTrigger);
+
+        // Custom cursor
+        const cursor = document.querySelector('.cursor');
+        let mouseX = 0, mouseY = 0, cursorX = 0, cursorY = 0;
+
+        document.addEventListener('mousemove', (e) => {
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+        });
+
+        function animateCursor() {
+            cursorX += (mouseX - cursorX) * 0.1;
+            cursorY += (mouseY - cursorY) * 0.1;
+            cursor.style.left = cursorX + 'px';
+            cursor.style.top = cursorY + 'px';
+            requestAnimationFrame(animateCursor);
         }
-      });
-    });
+        animateCursor();
 
-    // 4. Conveyor Belt
-    const track = document.querySelector('.track');
-    gsap.to(track, {
-      x: () => -(track.scrollWidth - window.innerWidth + 100),
-      ease: 'none',
-      scrollTrigger: {
-        trigger: '.conveyor-sec',
-        start: 'top top',
-        end: () => `+=${track.scrollWidth * 0.6}`, // Long scroll distance = controlled speed
-        pin: true,
-        scrub: 1.4,
-        invalidateOnRefresh: true
-      }
-    });
+        document.querySelectorAll('.hover-trigger').forEach(el => {
+            el.addEventListener('mouseenter', () => cursor.classList.add('hover'));
+            el.addEventListener('mouseleave', () => cursor.classList.remove('hover'));
+        });
 
-    // 5. Split Convergence
-    const leftPanel = document.querySelector('.split-left');
-    const rightPanel = document.querySelector('.split-right');
-    gsap.to(leftPanel, { x: 0, scrollTrigger: { trigger: '.split', start: 'top top', end: '+=150%', pin: true, scrub: 1.3 }});
-    gsap.from(leftPanel, { x: '-30%', ease: 'none' });
-    gsap.to(rightPanel, { x: 0, scrollTrigger: { trigger: '.split', start: 'top top', end: '+=150%', pin: true, scrub: 1.3 }});
-    gsap.from(rightPanel, { x: '30%', ease: 'none' });
-    // Meet in middle, then separate as scroll continues
-    const splitTL = gsap.timeline({ scrollTrigger: { trigger: '.split', start: 'center center', end: '+=150%', pin: true, scrub: 1.3 }});
-    splitTL.to(leftPanel, { x: '-25%' }).to(rightPanel, { x: '25%' }, '<');
+        // 1. VELOCITY SKEW EFFECT
+        // Elements skew based on scroll velocity
+        const heroContent = document.getElementById('hero-content');
+        
+        ScrollTrigger.create({
+            trigger: "#hero",
+            start: "top top",
+            end: "bottom bottom",
+            onUpdate: (self) => {
+                const velocity = lenis.velocity || 0;
+                const skew = Math.max(-15, Math.min(15, velocity * 0.5));
+                const scale = 1 - Math.abs(velocity) * 0.001;
+                
+                gsap.to(heroContent, {
+                    skewY: skew,
+                    scale: Math.max(0.9, scale),
+                    duration: 0.3,
+                    ease: "power2.out"
+                });
+            }
+        });
 
-    // 6. Stack Deck
-    document.querySelectorAll('.deck-card').forEach((card, i) => {
-      gsap.to(card, {
-        y: () => (i - 1) * -80,
-        scale: () => 1 - (i * 0.08),
-        rotateX: () => 4 + (i * 2),
-        zIndex: 3 - i,
-        ease: 'none',
-        scrollTrigger: { trigger: '.stack', start: 'top top', end: '+=200%', pin: true, scrub: 1.2 }
-      });
-    });
+        gsap.from('.hero-line', {
+            y: 100,
+            opacity: 0,
+            duration: 1.2,
+            stagger: 0.2,
+            ease: "power4.out",
+            delay: 0.5
+        });
 
-    // 7. Parallax Grid
-    document.querySelectorAll('.p-cell').forEach((cell, i) => {
-      const speed = 0.2 + (i % 3) * 0.15;
-      gsap.to(cell, {
-        y: -150 * speed,
-        ease: 'none',
-        scrollTrigger: { trigger: '.p-grid', start: 'top 70%', end: 'bottom 30%', scrub: 1.4 }
-      });
-    });
+        // 2. MASKED TEXT REVEAL
+        // Text reveals from behind sliding masks
+        const revealContainers = document.querySelectorAll('.text-reveal-container');
+        
+        revealContainers.forEach((container, i) => {
+            const mask = container.querySelector('.text-reveal-mask');
+            const text = container.querySelector('.reveal-text');
+            const delay = parseFloat(text.dataset.delay) || 0;
+            
+            gsap.to(mask, {
+                scaleX: 0,
+                transformOrigin: "right center",
+                ease: "none",
+                scrollTrigger: {
+                    trigger: container,
+                    start: `top+=${delay * 100} 80%`,
+                    end: `top+=${delay * 100} 30%`,
+                    scrub: 1
+                }
+            });
+            
+            gsap.from(text, {
+                x: -50,
+                opacity: 0,
+                ease: "none",
+                scrollTrigger: {
+                    trigger: container,
+                    start: `top+=${delay * 100} 80%`,
+                    end: `top+=${delay * 100} 30%`,
+                    scrub: 1
+                }
+            });
+        });
 
-    // 8. Clip Reveal
-    gsap.to('.clip-mask', {
-      clipPath: 'inset(0 100% 0 0)',
-      ease: 'none',
-      scrollTrigger: { trigger: '.clip', start: 'top 60%', end: 'bottom 40%', scrub: 1.3 }
-    });
+        // 3. 3D CARD TUNNEL
+        // Cards rotate in 3D space through Z-axis
+        const tunnelCards = document.querySelectorAll('.tunnel-card');
+        
+        tunnelCards.forEach((card, i) => {
+            const depth = parseInt(card.dataset.depth);
+            const zStart = -1000 + (i * 500);
+            const zEnd = 500 - (i * 300);
+            
+            gsap.fromTo(card, 
+                { 
+                    z: zStart, 
+                    rotateY: 45,
+                    opacity: 0,
+                    scale: 0.5
+                },
+                {
+                    z: zEnd,
+                    rotateY: 0,
+                    opacity: 1,
+                    scale: 1,
+                    ease: "none",
+                    scrollTrigger: {
+                        trigger: "#tunnel",
+                        start: "top top",
+                        end: "bottom bottom",
+                        scrub: 1
+                    }
+                }
+            );
+        });
 
-    // 9. Z-Tunnel
-    document.querySelectorAll('.tunnel-card').forEach((card, i) => {
-      gsap.set(card, { z: -300, opacity: 0, rotateY: 15 });
-      gsap.to(card, {
-        z: 100, opacity: 1, rotateY: -5, scale: 1 + (i * 0.1),
-        ease: 'none',
-        scrollTrigger: { trigger: '.tunnel', start: 'top bottom', end: 'bottom top', scrub: 1.5 }
-      });
-    });
+        // 4. LIQUID MORPH GRID
+        // Organic shapes reposition based on scroll
+        gsap.to('.morph-blob-1', {
+            x: 200,
+            y: -100,
+            scale: 1.5,
+            ease: "none",
+            scrollTrigger: {
+                trigger: "#morph",
+                start: "top bottom",
+                end: "bottom top",
+                scrub: 1
+            }
+        });
 
-    // 10. Unmask Curtain
-    gsap.to('.curtain', {
-      y: '-100%',
-      ease: 'none',
-      scrollTrigger: { trigger: '.unmask', start: 'top top', end: '+=180%', pin: true, scrub: 1.3 }
-    });
-    gsap.to('.unmask-content', {
-      opacity: 1,
-      scrollTrigger: { trigger: '.unmask', start: 'top center', end: 'center center', scrub: 1 }
-    });
+        gsap.to('.morph-blob-2', {
+            x: -150,
+            y: 150,
+            scale: 0.8,
+            ease: "none",
+            scrollTrigger: {
+                trigger: "#morph",
+                start: "top bottom",
+                end: "bottom top",
+                scrub: 1
+            }
+        });
 
-    // Contact Assemble
-    gsap.from('.contact-title', { y: 60, opacity: 0, rotateX: 15, scrollTrigger: { trigger: '.contact', start: 'top 60%', end: 'bottom 20%', scrub: 1.2 }});
-    gsap.from('.contact-btn', { scale: 0.8, opacity: 0, y: 30, scrollTrigger: { trigger: '.contact', start: 'top 50%', end: 'center center', scrub: 1.3 }});
+        gsap.to('.morph-blob-3', {
+            x: 100,
+            y: 100,
+            scale: 1.2,
+            ease: "none",
+            scrollTrigger: {
+                trigger: "#morph",
+                start: "top bottom",
+                end: "bottom top",
+                scrub: 1
+            }
+        });
 
-    // Cleanup & Resize
-    window.addEventListener('resize', () => ScrollTrigger.refresh());
-  </script>
+        gsap.from('.morph-title', {
+            filter: 'blur(20px)',
+            opacity: 0.3,
+            ease: "none",
+            scrollTrigger: {
+                trigger: "#morph",
+                start: "top 80%",
+                end: "center center",
+                scrub: 1
+            }
+        });
+
+        // 5. GLITCH SCROLL TRIGGER
+        // Text glitches when scrolling past
+        const glitchTexts = document.querySelectorAll('.glitch-text');
+        
+        glitchTexts.forEach(text => {
+            const originalText = text.textContent;
+            
+            ScrollTrigger.create({
+                trigger: "#glitch",
+                start: "top 60%",
+                end: "top 20%",
+                onUpdate: (self) => {
+                    const progress = self.progress;
+                    if (progress > 0.3 && progress < 0.7) {
+                        const glitchChars = '!@#$%^&*()_+-=[]{}|;:,.<>?';
+                        let glitched = '';
+                        for (let i = 0; i < originalText.length; i++) {
+                            if (Math.random() > 0.7) {
+                                glitched += glitchChars[Math.floor(Math.random() * glitchChars.length)];
+                            } else {
+                                glitched += originalText[i];
+                            }
+                        }
+                        text.textContent = glitched;
+                        
+                        // Random transform
+                        gsap.to(text, {
+                            x: (Math.random() - 0.5) * 10,
+                            y: (Math.random() - 0.5) * 5,
+                            duration: 0.1
+                        });
+                    } else {
+                        text.textContent = originalText;
+                        gsap.to(text, { x: 0, y: 0, duration: 0.2 });
+                    }
+                }
+            });
+        });
+
+        // 6. INFINITE VELOCITY MARQUEE
+        // Speed increases with scroll velocity, reverses on scroll up
+        let marquee1Pos = 0;
+        let marquee2Pos = 0;
+        let targetSpeed1 = 1;
+        let targetSpeed2 = -1;
+
+        ScrollTrigger.create({
+            trigger: "#marquee",
+            start: "top bottom",
+            end: "bottom top",
+            onUpdate: (self) => {
+                const velocity = lenis.velocity || 0;
+                targetSpeed1 = 1 + Math.abs(velocity) * 0.5;
+                targetSpeed2 = -(1 + Math.abs(velocity) * 0.5);
+                
+                if (velocity < 0) {
+                    targetSpeed1 *= -1;
+                    targetSpeed2 *= -1;
+                }
+            }
+        });
+
+        function animateMarquee() {
+            marquee1Pos -= targetSpeed1;
+            marquee2Pos -= targetSpeed2;
+            
+            const track1 = document.getElementById('marquee-1');
+            const track2 = document.getElementById('marquee-2');
+            
+            if (track1) {
+                const width1 = track1.scrollWidth / 2;
+                if (marquee1Pos <= -width1) marquee1Pos = 0;
+                if (marquee1Pos >= 0) marquee1Pos = -width1;
+                track1.style.transform = `translateX(${marquee1Pos}px)`;
+            }
+            
+            if (track2) {
+                const width2 = track2.scrollWidth / 2;
+                if (marquee2Pos <= -width2) marquee2Pos = 0;
+                if (marquee2Pos >= 0) marquee2Pos = -width2;
+                track2.style.transform = `translateX(${marquee2Pos}px)`;
+            }
+            
+            requestAnimationFrame(animateMarquee);
+        }
+        animateMarquee();
+
+        // 7. CLIP-PATH PORTFOLIO REVEAL
+        // Images reveal from bottom to top
+        const clipItems = document.querySelectorAll('.clip-item');
+        
+        clipItems.forEach((item, i) => {
+            gsap.to(item, {
+                clipPath: 'inset(0% 0 0 0)',
+                ease: "none",
+                scrollTrigger: {
+                    trigger: "#work",
+                    start: `${i * 25}% top`,
+                    end: `${(i + 1) * 25}% top`,
+                    scrub: 1
+                }
+            });
+            
+            // Parallax within the sticky container
+            gsap.to(item, {
+                y: -50 * (i + 1),
+                ease: "none",
+                scrollTrigger: {
+                    trigger: "#work",
+                    start: "top top",
+                    end: "bottom bottom",
+                    scrub: 1
+                }
+            });
+        });
+
+        // 8. STACKING CARDS WITH SCALE
+        // Cards stack with scale and brightness changes
+        const stackCards = document.querySelectorAll('.stack-card');
+        const totalCards = stackCards.length;
+        
+        stackCards.forEach((card, i) => {
+            const startPercent = (i / totalCards) * 100;
+            const endPercent = ((i + 1) / totalCards) * 100;
+            
+            gsap.fromTo(card,
+                { 
+                    scale: 1, 
+                    filter: 'brightness(1)',
+                    y: 0
+                },
+                {
+                    scale: 0.9 - (i * 0.05),
+                    filter: `brightness(${0.3 + (i * 0.2)})`,
+                    y: -30 * i,
+                    ease: "none",
+                    scrollTrigger: {
+                        trigger: "#lab",
+                        start: `${startPercent}% top`,
+                        end: `${endPercent}% top`,
+                        scrub: 1
+                    }
+                }
+            );
+        });
+
+        // 9. HORIZONTAL VELOCITY SLIDER
+        // Horizontal movement controlled by vertical scroll with velocity boost
+        const velocityTrack = document.getElementById('velocity-track');
+        
+        gsap.to(velocityTrack, {
+            x: () => -(velocityTrack.scrollWidth - window.innerWidth + 100),
+            ease: "none",
+            scrollTrigger: {
+                trigger: "#velocity",
+                start: "top top",
+                end: "bottom bottom",
+                scrub: 1,
+                onUpdate: (self) => {
+                    const velocity = lenis.velocity || 0;
+                    // Add velocity-based boost
+                    if (Math.abs(velocity) > 2) {
+                        const boost = velocity * 2;
+                        gsap.to(velocityTrack, {
+                            x: `+=${boost}`,
+                            duration: 0.3,
+                            overwrite: 'auto'
+                        });
+                    }
+                }
+            }
+        });
+
+        // 10. SVG PATH DRAW
+        // Lines draw themselves as you scroll
+        const drawPaths = document.querySelectorAll('.draw-path');
+        
+        drawPaths.forEach((path, i) => {
+            const length = path.getTotalLength ? path.getTotalLength() : 1000;
+            path.style.strokeDasharray = length;
+            path.style.strokeDashoffset = length;
+            
+            gsap.to(path, {
+                strokeDashoffset: 0,
+                ease: "none",
+                scrollTrigger: {
+                    trigger: "#contact",
+                    start: `${i * 20}% 80%`,
+                    end: `${i * 20 + 50}% 20%`,
+                    scrub: 1
+                }
+            });
+        });
+
+        // Contact animations
+        gsap.from('.contact-title', {
+            y: 100,
+            opacity: 0,
+            duration: 1,
+            ease: "power4.out",
+            scrollTrigger: {
+                trigger: "#contact",
+                start: "top 60%",
+                toggleActions: "play none none reverse"
+            }
+        });
+
+        gsap.from('.contact-sub', {
+            y: 50,
+            opacity: 0,
+            duration: 1,
+            delay: 0.2,
+            ease: "power4.out",
+            scrollTrigger: {
+                trigger: "#contact",
+                start: "top 60%",
+                toggleActions: "play none none reverse"
+            }
+        });
+
+        // Refresh on resize
+        let resizeTimer;
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(() => ScrollTrigger.refresh(), 250);
+        });
+
+        // Smooth anchor scrolling
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) lenis.scrollTo(target, { duration: 1.5 });
+            });
+        });
+
+        // Reduced motion check
+        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+            lenis.destroy();
+            ScrollTrigger.getAll().forEach(st => st.kill());
+        }
+    </script>
 </body>
 </html>
