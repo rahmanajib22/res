@@ -1,613 +1,220 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>Kinetic Portfolio | Scroll-Driven Motion</title>
-  <!-- Google Fonts & Smoothing -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
-  <!-- GSAP & ScrollTrigger & Lenis -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@studio-freight/lenis@1.0.42/dist/lenis.min.js"></script>
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cinematic Motion v3</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;900&display=swap" rel="stylesheet">
+    <style>
+        :root { --bg: #000; --accent: #ff3e00; --text: #fff; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; overflow-x: hidden; }
+        
+        /* 1. Progress Bar Concept */
+        .scroll-progress {
+            position: fixed; top: 0; left: 0; width: 0%; height: 4px;
+            background: var(--accent); z-index: 10000;
+        }
 
-    body {
-      font-family: 'Inter', sans-serif;
-      background: #05050A;
-      color: #F0F0F0;
-      overflow-x: hidden;
-      overscroll-behavior: none;
-    }
+        section { position: relative; width: 100%; min-height: 100vh; overflow: hidden; }
 
-    /* Custom smooth scroll via Lenis, disable default */
-    html.lenis {
-      height: auto;
-    }
+        /* 2. Hero Lens Blur Concept */
+        .hero { display: flex; align-items: center; justify-content: center; background: #050505; }
+        .hero-title { font-size: 12vw; font-weight: 900; filter: blur(20px); transform: scale(1.5); opacity: 0; }
 
-    /* ===== UTILITY & LAYOUT ===== */
-    .container {
-      max-width: 1400px;
-      margin: 0 auto;
-      padding: 0 2rem;
-    }
+        /* 3. The "Stacking" Pinned Cards */
+        .stack-section { height: 400vh; background: #0a0a0a; }
+        .stack-container { position: sticky; top: 0; height: 100vh; display: flex; align-items: center; justify-content: center; }
+        .stack-card {
+            position: absolute; width: 50vw; height: 60vh; background: #1a1a1a;
+            border: 1px solid #333; border-radius: 20px; display: flex;
+            align-items: center; justify-content: center; font-size: 2rem;
+            transform-origin: bottom center;
+        }
 
-    section {
-      margin-bottom: 6rem;
-      position: relative;
-    }
+        /* 4. Horizontal Conveyor (Precise Control) */
+        .conveyor-section { height: 300vh; background: var(--accent); color: #000; }
+        .conveyor-sticky { position: sticky; top: 0; height: 100vh; display: flex; align-items: center; }
+        .conveyor-track { display: flex; gap: 100px; padding: 0 50px; will-change: transform; }
+        .conveyor-item { font-size: 15vw; font-weight: 900; white-space: nowrap; line-height: 1; }
 
-    .section-title {
-      font-size: clamp(2rem, 5vw, 3.5rem);
-      font-weight: 700;
-      letter-spacing: -0.02em;
-      margin-bottom: 3rem;
-      background: linear-gradient(135deg, #FFFFFF 0%, #A0A0FF 100%);
-      background-clip: text;
-      -webkit-background-clip: text;
-      color: transparent;
-      display: inline-block;
-    }
+        /* 5. Split Reveal Concept */
+        .split-section { display: flex; height: 100vh; }
+        .split-side { width: 50%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 5vw; font-weight: 900; }
+        .left-side { background: #111; transform: translateX(-100%); }
+        .right-side { background: #222; transform: translateX(100%); }
 
-    /* ===== HERO ===== */
-    .hero {
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      position: relative;
-      overflow: hidden;
-      isolation: isolate;
-    }
-    .hero-content {
-      z-index: 2;
-    }
-    .hero h1 {
-      font-size: clamp(3rem, 8vw, 5.5rem);
-      font-weight: 800;
-      line-height: 1.1;
-      margin-bottom: 1rem;
-    }
-    .hero p {
-      font-size: 1.2rem;
-      opacity: 0.7;
-      max-width: 600px;
-      margin: 0 auto;
-    }
-    .parallax-shape {
-      position: absolute;
-      width: 400px;
-      height: 400px;
-      background: radial-gradient(circle, rgba(100,100,255,0.2) 0%, rgba(0,0,0,0) 70%);
-      border-radius: 50%;
-      filter: blur(60px);
-      pointer-events: none;
-      top: 40%;
-      left: 20%;
-      will-change: transform;
-    }
+        /* 6. Text Scramble/Fill Concept */
+        .text-fill-section { height: 200vh; display: flex; align-items: center; justify-content: center; }
+        .text-fill { font-size: 6vw; font-weight: 900; color: rgba(255,255,255,0.1); position: sticky; top: 40%; }
+        .text-fill span { color: var(--accent); display: inline-block; width: 0; overflow: hidden; white-space: nowrap; transition: 0.1s; }
 
-    /* Cards Grid (Slide in/out dynamic) */
-    .cards-grid {
-      display: flex;
-      flex-direction: column;
-      gap: 4rem;
-      margin: 3rem 0;
-    }
+        /* 7. 3D Floating Elements */
+        .float-box { position: absolute; width: 200px; height: 200px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.2); }
 
-    .project-card {
-      background: rgba(20, 20, 30, 0.85);
-      backdrop-filter: blur(4px);
-      border-radius: 2rem;
-      padding: 2rem;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 2rem;
-      align-items: center;
-      border: 1px solid rgba(255,255,255,0.1);
-      box-shadow: 0 20px 35px -12px rgba(0,0,0,0.5);
-      transition: all 0.4s cubic-bezier(0.2, 0.9, 0.4, 1.1);
-      will-change: transform;
-    }
-    /* Hover effect for extra polish */
-    .project-card:hover {
-      transform: scale(1.02);
-      background: rgba(30, 30, 45, 0.9);
-      border-color: rgba(120, 120, 255, 0.5);
-      box-shadow: 0 25px 40px -12px rgba(0,0,0,0.7);
-    }
-    .card-media {
-      flex: 1.2;
-      min-width: 200px;
-      height: 220px;
-      background: linear-gradient(135deg, #1a1a2e, #16213e);
-      border-radius: 1.5rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 3rem;
-      font-weight: bold;
-      color: rgba(255,255,255,0.8);
-      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.1), 0 10px 20px -5px black;
-    }
-    .card-info {
-      flex: 1.8;
-    }
-    .card-info h3 {
-      font-size: 1.8rem;
-      font-weight: 700;
-      margin-bottom: 0.75rem;
-      background: linear-gradient(120deg, #fff, #b9b9ff);
-      background-clip: text;
-      -webkit-background-clip: text;
-      color: transparent;
-    }
-    .card-info p {
-      color: #b0b0c0;
-      line-height: 1.5;
-      margin-bottom: 1rem;
-    }
-    .tech-tag {
-      display: inline-block;
-      background: rgba(100,100,255,0.2);
-      padding: 0.3rem 1rem;
-      border-radius: 40px;
-      font-size: 0.8rem;
-      font-weight: 500;
-      backdrop-filter: blur(2px);
-    }
+        /* 8. Zoom Reveal */
+        .zoom-section { height: 100vh; display: flex; align-items: center; justify-content: center; }
+        .zoom-circle { width: 100px; height: 100px; background: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #000; font-weight: 900; }
 
-    /* Conveyor belt section */
-    .belt-section {
-      margin: 8rem 0;
-      overflow: hidden;
-      position: relative;
-    }
-    .belt-container {
-      width: 100%;
-      overflow-x: hidden;
-      position: relative;
-      padding: 2rem 0;
-    }
-    .belt-track {
-      display: flex;
-      gap: 2rem;
-      width: max-content;
-      will-change: transform;
-      padding: 0 1rem;
-    }
-    .belt-card {
-      width: 300px;
-      flex-shrink: 0;
-      background: rgba(10, 10, 20, 0.8);
-      backdrop-filter: blur(8px);
-      border-radius: 1.5rem;
-      padding: 1.8rem;
-      border: 1px solid rgba(255,255,255,0.15);
-      transition: all 0.3s ease;
-      cursor: default;
-    }
-    .belt-card:hover {
-      transform: translateY(-10px);
-      background: rgba(30, 30, 55, 0.9);
-      border-color: #6a6aff;
-    }
-    .belt-card .belt-icon {
-      font-size: 2.5rem;
-      margin-bottom: 1rem;
-    }
-    .belt-card h4 {
-      font-size: 1.4rem;
-      margin-bottom: 0.5rem;
-    }
-    .belt-card p {
-      font-size: 0.9rem;
-      opacity: 0.7;
-    }
+        /* 9. Background Inversion */
+        .invert-trigger { height: 100vh; background: #fff; color: #000; display: flex; align-items: center; justify-content: center; font-size: 4vw; }
 
-    /* footer */
-    .footer {
-      text-align: center;
-      padding: 3rem 0;
-      border-top: 1px solid rgba(255,255,255,0.1);
-      margin-top: 4rem;
-    }
-
-    /* Responsive */
-    @media (max-width: 768px) {
-      .container {
-        padding: 0 1.5rem;
-      }
-      .project-card {
-        flex-direction: column;
-        text-align: center;
-      }
-      .card-media {
-        width: 100%;
-      }
-      .belt-card {
-        width: 260px;
-      }
-      .section-title {
-        margin-bottom: 2rem;
-      }
-    }
-
-    /* Hide horizontal scroll */
-    body {
-      overflow-x: hidden;
-    }
-  </style>
+        /* 10. Cinematic Outro */
+        .outro { height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+    </style>
 </head>
 <body>
-  <main>
-    <!-- HERO SECTION with parallax horizontal motion -->
-    <div class="hero">
-      <div class="hero-content container">
-        <h1>Scroll<span style="color:#8b8bff;">·</span>Driven<br>Motion Lab</h1>
-        <p>Where every scroll controls physics — slide, drift, and conveyor effects with cinematic reversibility</p>
-      </div>
-      <div class="parallax-shape" id="parallaxOrb"></div>
-    </div>
 
-    <div class="container">
-      <!-- PROJECTS: cards sliding from sides (left/right) and sliding out further -->
-      <section>
-        <div class="section-title">✦ Reactive Projects</div>
-        <div class="cards-grid" id="cardsGrid">
-          <!-- Each card will have individual slide-in & slide-out behavior bound to scroll -->
-          <div class="project-card" data-slide="left">
-            <div class="card-media">⚡︎</div>
-            <div class="card-info">
-              <h3>Nebula Interface</h3>
-              <p>Immersive 3D configurator with real-time lighting. Scroll down makes the interface slide from left → center → right outward.</p>
-              <span class="tech-tag">Three.js</span>
-              <span class="tech-tag">GSAP</span>
+    <div class="scroll-progress"></div>
+
+    <main>
+        <section class="hero">
+            <h1 class="hero-title">CINEMATIC</h1>
+        </section>
+
+        <section class="stack-section">
+            <div class="stack-container">
+                <div class="stack-card" style="z-index: 3;">01. THE VISION</div>
+                <div class="stack-card" style="z-index: 2;">02. THE DEPTH</div>
+                <div class="stack-card" style="z-index: 1;">03. THE MOTION</div>
             </div>
-          </div>
-          <div class="project-card" data-slide="right">
-            <div class="card-media">🌀</div>
-            <div class="card-info">
-              <h3>Fluid Dynamics</h3>
-              <p>Interactive particle system tied to scroll velocity. Cards glide from the right, settle, then exit left as you scroll deeper.</p>
-              <span class="tech-tag">WebGL</span>
-              <span class="tech-tag">React</span>
+        </section>
+
+        <section class="conveyor-section">
+            <div class="conveyor-sticky">
+                <div class="conveyor-track">
+                    <div class="conveyor-item">CONTROLLED</div>
+                    <div class="conveyor-item">—</div>
+                    <div class="conveyor-item">HORIZONTAL</div>
+                    <div class="conveyor-item">—</div>
+                    <div class="conveyor-item">SCROLLING</div>
+                </div>
             </div>
-          </div>
-          <div class="project-card" data-slide="left">
-            <div class="card-media">✨</div>
-            <div class="card-info">
-              <h3>Kinetic Studio</h3>
-              <p>Generative motion design portfolio. Each scroll step moves this card horizontally — like it's physically attached to the wheel.</p>
-              <span class="tech-tag">Canvas API</span>
-              <span class="tech-tag">ScrollTrigger</span>
+        </section>
+
+        <section class="split-section">
+            <div class="split-side left-side">CREATIVE</div>
+            <div class="split-side right-side">ENGINE</div>
+        </section>
+
+        <section class="text-fill-section">
+            <div class="text-fill">THE FUTURE IS <span>THE FUTURE IS</span></div>
+        </section>
+
+        <section style="height: 150vh;">
+            <div class="float-box" style="top: 20%; left: 10%;"></div>
+            <div class="float-box" style="top: 50%; left: 70%;"></div>
+            <div class="float-box" style="top: 80%; left: 30%;"></div>
+            <div style="display: flex; align-items: center; justify-content: center; height: 100%;">
+                <h2 style="font-size: 5vw; z-index: 10;">PARALLAX DEBRIS</h2>
             </div>
-          </div>
-        </div>
-      </section>
-    </div>
+        </section>
 
-    <!-- CONVEYOR BELT SECTION: cards move horizontally based on vertical scroll -->
-    <section class="belt-section">
-      <div class="container">
-        <div class="section-title">◈ Conveyor Belt | Scroll‑Controlled Slide</div>
-        <p style="margin-bottom: 2rem; opacity: 0.7;">Vertical scrolling drives horizontal movement — like a conveyor belt synced to your finger.</p>
-      </div>
-      <div class="belt-container" id="beltContainer">
-        <div class="belt-track" id="beltTrack">
-          <div class="belt-card"><div class="belt-icon">🎨</div><h4>Creative Code</h4><p>Generative visuals driven by scroll progress</p></div>
-          <div class="belt-card"><div class="belt-icon">🎥</div><h4>Cinematic UI</h4><p>Scroll-triggered camera moves</p></div>
-          <div class="belt-card"><div class="belt-icon">🌀</div><h4>Parallax Flow</h4><p>Depth layers follow vertical axis</p></div>
-          <div class="belt-card"><div class="belt-icon">⚙️</div><h4>Dynamic Engine</h4><p>Real-time scrub physics</p></div>
-          <div class="belt-card"><div class="belt-icon">🌊</div><h4>Wave Motion</h4><p>Scroll = horizontal frequency</p></div>
-          <div class="belt-card"><div class="belt-icon">✨</div><h4>Morph Studio</h4><p>Shape shifting with inertia</p></div>
-        </div>
-      </div>
-    </section>
+        <section class="zoom-section">
+            <div class="zoom-circle">EXPLORE</div>
+        </section>
 
-    <div class="container">
-      <div style="height: 4rem;"></div>
-      <div class="footer">
-        <p>Scroll-driven cinematic experience — every motion is reversible & connected to your scroll position.</p>
-        <p style="margin-top: 1rem; font-size: 0.8rem;">GSAP ScrollTrigger • Lenis Smooth • Conveyor Belt • Slide In/Out Cards</p>
-      </div>
-    </div>
-  </main>
+        <section class="invert-trigger">
+            <h2>COLOR INVERSION</h2>
+        </section>
 
-  <script>
-    // INIT LENIS FOR SMOOTH SCROLLING + INERTIA
-    const lenis = new Lenis({
-      duration: 1.2,
-      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-      smoothWheel: true,
-      smoothTouch: true,
-      touchMultiplier: 1.5,
-      infinite: false,
-    });
+        <section class="outro">
+            <p>END OF EXPERIENCE</p>
+            <h2 style="font-size: 3vw;">SCROLL UP TO REPLAY</h2>
+        </section>
+    </main>
 
-    function raf(time) {
-      lenis.raf(time);
-      requestAnimationFrame(raf);
-    }
-    requestAnimationFrame(raf);
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <script src="https://unpkg.com/@studio-freight/lenis@1.0.33/dist/lenis.min.js"></script>
 
-    // Register GSAP plugins
-    gsap.registerPlugin(ScrollTrigger);
+    <script>
+        gsap.registerPlugin(ScrollTrigger);
 
-    // --- Helper: make each card slide IN from side and then slide OUT further based on scroll ---
-    // We'll apply to all .project-card elements: 
-    // For each card, timeline: x:-250 (left offscreen) → x:0 (center) → x:250 (right offscreen)
-    // scroll progress range: start when card's top hits bottom of viewport, end when card's bottom hits top of viewport.
-    // This makes scroll control the exact horizontal position, fully reversible.
-    const cards = document.querySelectorAll('.project-card');
-    
-    cards.forEach((card) => {
-      // Optional: slight variation based on data attribute? but uniform elegant
-      // We'll build animation: from -250px to 0px to +250px (px relative to original position)
-      // Use timeline with two tweens, scrubbed by ScrollTrigger.
-      // Also use will-change
-      
-      // We must ensure no conflict with hover transforms? we use GSAP to control x, but hover uses scale.
-      // GSAP overwrites transforms on x but scale is separate (transform matrix). It's safe.
-      const tl = gsap.timeline({
-        scrollTrigger: {
-          trigger: card,
-          start: "top bottom",        // when top of card hits bottom of viewport
-          end: "bottom top",          // when bottom of card hits top of viewport
-          scrub: true,                // true scrubbing -> motion directly linked to scroll (both forward/back)
-          invalidateOnRefresh: true,
-          // markers: false,          // (no markers for production)
-        },
-        defaults: { ease: "none", duration: 1 } // duration within timeline mapping 0-1
-      });
-      
-      // first half: from left (-250) to center (0) at progress 0 -> 0.5
-      // second half: from center (0) to right (250) at progress 0.5 -> 1
-      tl.fromTo(card, 
-        { x: -280, clearProps: false }, 
-        { x: 0, duration: 0.5 }, 
-        0
-      ).fromTo(card, 
-        { x: 0 }, 
-        { x: 280, duration: 0.5 }, 
-        0.5
-      );
-      
-      // Additional: slight rotation for dynamic effect? optional but adds motion depth
-      // Not mandatory but gives a cinematic "twist". We'll add a little yoyo rotation 0->2deg->0
-      // This doesn't break requirement, enhances "motion" feel.
-      gsap.fromTo(card, 
-        { rotate: -2 }, 
-        { 
-          rotate: 2, 
-          scrollTrigger: {
-            trigger: card,
-            start: "top bottom",
-            end: "bottom top",
-            scrub: 1.2,
-          },
-          ease: "none"
-        }
-      );
-    });
+        // --- LENIS SMOOTH SCROLL (Inertia) ---
+        const lenis = new Lenis({ duration: 1.5, lerp: 0.05 });
+        function raf(time) { lenis.raf(time); requestAnimationFrame(raf); }
+        requestAnimationFrame(raf);
 
-    // --- Additional Parallax Horizontal Motion (Hero shape tied to vertical scroll) ---
-    // parallax-shape moves horizontally across screen based on scroll Y (cinematic)
-    const orb = document.querySelector('#parallaxOrb');
-    if (orb) {
-      gsap.to(orb, {
-        x: 300,
-        scrollTrigger: {
-          trigger: ".hero",
-          start: "top top",
-          end: "bottom top",
-          scrub: 1.5,
-          invalidateOnRefresh: true
-        },
-        ease: "none"
-      });
-      // also a subtle vertical shift
-      gsap.to(orb, {
-        y: 120,
-        scrollTrigger: {
-          trigger: ".hero",
-          start: "top top",
-          end: "bottom top",
-          scrub: 1,
-        },
-        ease: "none"
-      });
-    }
+        // 1. Progress Bar
+        gsap.to(".scroll-progress", {
+            width: "100%", scrollTrigger: { scrub: 0.3 }
+        });
 
-    // --- CONVEYOR BELT: horizontal movement based on vertical scroll ---
-    // belt-track moves left/right as user scrolls inside belt-section range
-    const beltTrack = document.getElementById('beltTrack');
-    const beltContainer = document.getElementById('beltContainer');
-    
-    let maxScrollDistance = 0;
-    let beltScrollTrigger = null;
-    
-    function updateBeltAnimation() {
-      // recalculate total width difference
-      if (!beltTrack || !beltContainer) return;
-      const trackWidth = beltTrack.scrollWidth;
-      const containerWidth = beltContainer.clientWidth;
-      // total scrollable distance = track width - container width (positive value)
-      let maxMove = Math.max(0, trackWidth - containerWidth);
-      // avoid negative or zero movement if track fits
-      if (maxMove === 0) maxMove = 0.01;
-      maxScrollDistance = maxMove;
-      
-      // kill existing ScrollTrigger for belt if any
-      if (beltScrollTrigger) {
-        beltScrollTrigger.kill();
-      }
-      
-      // Animate beltTrack x position from 0 to -maxMove based on scroll within belt-section
-      // Use GSAP .to with ScrollTrigger scrub to map scroll progress exactly.
-      // Ensure reversibility: because scrub:true, it reverses when scrolling up.
-      beltScrollTrigger = gsap.to(beltTrack, {
-        x: -maxScrollDistance,
-        ease: "none",
-        scrollTrigger: {
-          trigger: ".belt-section",
-          start: "top 75%",        // start animation when section top hits 75% viewport
-          end: "bottom 25%",       // end when bottom hits 25% viewport — smooth full range
-          scrub: 1.2,              // strong scrubbing with a bit of inertia lag but still reversible
-          invalidateOnRefresh: true,
-          onUpdate: (self) => {
-            // optional: add dynamic effect, but gsap handles fully
-          }
-        }
-      });
-    }
-    
-    // init belt and listen to resize / content changes
-    window.addEventListener('resize', () => {
-      updateBeltAnimation();
-      ScrollTrigger.refresh();
-    });
-    
-    // Also observe any font/load changes: simple timeout
-    setTimeout(() => {
-      updateBeltAnimation();
-      ScrollTrigger.refresh();
-    }, 100);
-    
-    // additionally, when images might load (none here, but belt card text might wrap)
-    // force refresh after a small delay
-    window.addEventListener('load', () => {
-      updateBeltAnimation();
-      ScrollTrigger.refresh();
-    });
-    
-    // --- Secondary horizontal motion effects: tie additional elements to scroll for extra "connected" feel
-    // Move some decorative elements on scroll to enhance parallax style, also demonstrate "horizontal motion tied to vertical scrolling"
-    // Create small floating gradient indicators? already hero orb, but add another: card grid background tilt.
-    const cardsGrid = document.querySelector('.cards-grid');
-    if (cardsGrid) {
-      gsap.to(cardsGrid, {
-        x: 35,
-        scrollTrigger: {
-          trigger: ".cards-grid",
-          start: "top bottom",
-          end: "bottom top",
-          scrub: 0.8,
-        },
-        ease: "none"
-      });
-    }
-    
-    // Additional micro-animation: belt cards own parallax drift while scrolling inside belt section
-    // Each belt card moves slightly independently for extra flair (horizontal drift)
-    const beltCards = gsap.utils.toArray('.belt-card');
-    beltCards.forEach((card, i) => {
-      gsap.to(card, {
-        y: -15,
-        scrollTrigger: {
-          trigger: ".belt-section",
-          start: "top bottom",
-          end: "bottom top",
-          scrub: 1,
-        },
-        ease: "none"
-      });
-      // subtle rotation drift
-      gsap.to(card, {
-        rotate: 2,
-        scrollTrigger: {
-          trigger: ".belt-section",
-          start: "top bottom",
-          end: "bottom top",
-          scrub: 0.7,
-        },
-        ease: "none"
-      });
-    });
-    
-    // For each project card, add horizontal shadow parallax? Not needed but ensures extra smoothness
-    // Ensure that the cards slide in & out effect is completely reversible: scrub: true on timeline already does perfect reverse
-    // Also fix initial state: ensure no flicker from default transform because ScrollTrigger will set based on scroll position immediately
-    ScrollTrigger.refresh();
-    
-    // Because lenis scroll updates ScrollTrigger, we need to manually sync each frame
-    lenis.on('scroll', () => {
-      ScrollTrigger.update();
-    });
-    
-    // Prevent any residual horizontal overflow from GSAP transforms on cards (x could push out of body)
-    // set body overflow hidden already, but we also ensure container overflow visible but safe.
-    // Additional "conveyor belt" sync for inertial scroll with Lenis: ensures ultra smooth scrubbing.
-    // Also, make sure that belt recalc maxMove whenever track content changes (on load / resize)
-    
-    // Final touches: enhance responsiveness for sliding cards offset on mobile (reduce distance to avoid overflow)
-    function adjustSlideDistance() {
-      let isMobile = window.innerWidth <= 768;
-      let slideOffset = isMobile ? 150 : 280;
-      // Rebuild cards animations with new offset? simpler: kill and recreate each card animation
-      // However we already created them, but dynamic adjustment to keep from overflowing on small screens
-      // Better: update the timeline's from/to values?
-      // Since we don't want to overcomplicate, we can clear existing ScrollTriggers and reinit with new distance.
-      // But performance: we kill existing animations for cards and reinitialize.
-      // Actually clean solution: remove old triggers and reapply. But previous cards have multiple animations (rotation too).
-      // We'll do a full refresh but careful not to duplicate.
-      ScrollTrigger.getAll().forEach(trigger => {
-        if (trigger.vars && (trigger.vars.trigger === card || trigger.trigger === ".belt-section" || trigger.trigger === ".cards-grid" || trigger.trigger === ".hero")) {
-          // we will keep hero and belt, but cards we want to rebuild only if needed. For simplicity, we can avoid because sliding with 280px on mobile still looks cool? but small screens could cause slight overflow. To be robust, I will set dynamic via CSS media queries: reduce card x translation from CSS? But GSAP overwrites inline.
-        }
-      });
-      // Actually better: apply custom CSS for smaller screens to limit movement area? Not needed but we set that cards container overflow hidden on body.
-    }
-    window.addEventListener('resize', () => {
-      adjustSlideDistance();
-      ScrollTrigger.refresh();
-    });
-    
-    // small fix: ensure the belt track position updates on window resize after recalculation
-    window.addEventListener('resize', () => {
-      setTimeout(() => {
-        if (beltScrollTrigger) beltScrollTrigger.scrollTrigger.refresh();
-      }, 80);
-    });
-    
-    // Additional cinematic: slow initial load effect, ensure all motions are interactive
-    console.log('Scroll-driven site active — all animations scrubbing & reversible');
-    
-    // optional: add a subtle parallax to belt container background gradient (purely aesthetic)
-    const beltSection = document.querySelector('.belt-section');
-    if (beltSection) {
-      gsap.to(beltSection, {
-        backgroundPosition: "200% 0%",
-        scrollTrigger: {
-          trigger: ".belt-section",
-          start: "top bottom",
-          end: "bottom top",
-          scrub: 1.2,
-        },
-        ease: "none"
-      });
-      beltSection.style.background = "linear-gradient(90deg, rgba(5,5,10,0) 0%, rgba(80,70,150,0.1) 50%, rgba(5,5,10,0) 100%)";
-      beltSection.style.backgroundSize = "200% 100%";
-    }
-    
-    // ensure that cards 'slide in and out' motion includes both left and right offsets; we did that with range from -280 to 280.
-    // also ensure that reverse scroll moves back exactly.
-    // Conveyor belt complete with horizontal motion tied to vertical scrolling
-    // Additional card hover effects smooth with GSAP transforms (overwrites x) but hover scale is independent and remains.
-    // Optimize performance: will-change: transform for animated elements
-    document.querySelectorAll('.project-card, .belt-card, #parallaxOrb, .belt-track').forEach(el => {
-      el.style.willChange = 'transform';
-    });
-    
-    // Final tiny adjustment: prevent any white flash on load
-    gsap.set('.project-card', { clearProps: "all" });
-    ScrollTrigger.refresh(true);
-  </script>
+        // 2. Hero Lens Reveal
+        gsap.to(".hero-title", {
+            filter: "blur(0px)", scale: 1, opacity: 1,
+            scrollTrigger: { trigger: ".hero", start: "top top", end: "bottom top", scrub: true }
+        });
+
+        // 3. Stacking Cards (Physical Pinning)
+        const cards = gsap.utils.toArray(".stack-card");
+        cards.forEach((card, i) => {
+            gsap.fromTo(card, 
+                { scale: 1, yPercent: 0 },
+                { 
+                    scale: 1 - (i * 0.05), 
+                    yPercent: -100 * (cards.length - i),
+                    scrollTrigger: {
+                        trigger: ".stack-section",
+                        start: () => `top+=${i * 500} top`,
+                        end: "bottom top",
+                        scrub: true,
+                    }
+                }
+            );
+        });
+
+        // 4. Conveyor (Pinned Horizontal)
+        gsap.to(".conveyor-track", {
+            x: "-70%",
+            scrollTrigger: {
+                trigger: ".conveyor-section",
+                start: "top top",
+                end: "bottom top",
+                pin: true,
+                scrub: 1
+            }
+        });
+
+        // 5. Split Reveal
+        const splitTl = gsap.timeline({
+            scrollTrigger: { trigger: ".split-section", start: "top 80%", end: "top 20%", scrub: 1 }
+        });
+        splitTl.to(".left-side", { x: "0%" }, 0).to(".right-side", { x: "0%" }, 0);
+
+        // 6. Text Fill
+        gsap.to(".text-fill span", {
+            width: "100%",
+            scrollTrigger: { trigger: ".text-fill-section", start: "top top", end: "bottom top", pin: true, scrub: 1 }
+        });
+
+        // 7. Parallax Debris
+        gsap.utils.toArray(".float-box").forEach(box => {
+            gsap.to(box, {
+                y: -400, rotate: 360,
+                scrollTrigger: { trigger: box, start: "top bottom", end: "bottom top", scrub: 2 }
+            });
+        });
+
+        // 8. Zoom Circle Expand
+        gsap.to(".zoom-circle", {
+            scale: 50,
+            scrollTrigger: { trigger: ".zoom-section", start: "top top", end: "bottom top", pin: true, scrub: 1 }
+        });
+
+        // 9. Inversion
+        gsap.to("body", {
+            backgroundColor: "#fff", color: "#000",
+            scrollTrigger: { trigger: ".invert-trigger", start: "top 50%", end: "bottom 50%", scrub: true }
+        });
+
+        // 10. Outro Scale
+        gsap.from(".outro h2", {
+            letterSpacing: "50px", opacity: 0,
+            scrollTrigger: { trigger: ".outro", start: "top bottom", end: "bottom bottom", scrub: 1 }
+        });
+
+    </script>
 </body>
 </html>
