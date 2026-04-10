@@ -1,619 +1,880 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Cinetic Core | Slow Stack & Smooth Scroll</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700;900&display=swap" rel="stylesheet">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KOVACS — Creative Developer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --ink:#09090b;--paper:#f4f0e6;--cream:#ede8dc;
+  --gold:#c9a84c;--rust:#bf4a2b;--sage:#3d6b4f;
+  --mid:#7a7570;--dark:#141412;
+}
+html{font-size:16px}
+body{
+  font-family:'DM Mono',monospace;
+  background:var(--ink);color:var(--paper);
+  overflow-x:hidden;cursor:none;
+}
+::-webkit-scrollbar{width:2px}
+::-webkit-scrollbar-thumb{background:var(--gold)}
 
-        :root {
-            --bg-deep: #000000;
-            --card-bg: rgba(18, 18, 24, 0.92);
-            --accent: #ff3e00;
-            --text-bright: #ffffff;
-            --border-glow: rgba(255, 62, 0, 0.25);
-            --transition-leisure: cubic-bezier(0.23, 0.75, 0.32, 1.05);
-        }
+/* CURSOR */
+#cur,#cur2{
+  position:fixed;border-radius:50%;pointer-events:none;z-index:9999;
+  transform:translate(-50%,-50%);top:0;left:0;
+}
+#cur{width:8px;height:8px;background:var(--gold);transition:width .25s,height .25s}
+#cur2{width:34px;height:34px;border:1px solid rgba(201,168,76,.4);transition:width .3s,height .3s}
+body.h #cur{width:22px;height:22px}
+body.h #cur2{width:58px;height:58px;border-color:rgba(201,168,76,.7)}
 
-        body {
-            background: var(--bg-deep);
-            color: var(--text-bright);
-            font-family: 'Inter', sans-serif;
-            overflow-x: hidden;
-            scroll-behavior: smooth;
-        }
+/* PROGRESS */
+#pbar{position:fixed;top:0;left:0;height:2px;z-index:500;width:0%;
+  background:linear-gradient(90deg,var(--rust),var(--gold),var(--sage))}
 
-        /* custom scroll */
-        ::-webkit-scrollbar { width: 4px; }
-        ::-webkit-scrollbar-track { background: #0a0a0a; }
-        ::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 8px; }
+/* NAV */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:200;
+  display:flex;justify-content:space-between;align-items:center;
+  padding:1.4rem 3.5rem;mix-blend-mode:difference;
+}
+.nlogo{font-family:'Bebas Neue',sans-serif;font-size:1.6rem;letter-spacing:.1em;
+  color:var(--paper);text-decoration:none}
+.nlinks{display:flex;gap:2.5rem;list-style:none}
+.nlinks a{font-size:.63rem;color:var(--paper);text-decoration:none;
+  letter-spacing:.13em;text-transform:uppercase;opacity:.45;transition:opacity .3s}
+.nlinks a:hover{opacity:1}
 
-        .scroll-progress {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 0%;
-            height: 3px;
-            background: var(--accent);
-            z-index: 10000;
-            box-shadow: 0 0 10px #ff3e00;
-            pointer-events: none;
-        }
+/* ════════════════════════════════
+   1. HERO — LENS BLUR / FOCUS
+════════════════════════════════ */
+#hero{
+  height:100vh;position:relative;overflow:hidden;
+  display:flex;align-items:center;justify-content:center;
+}
+.h-bg{
+  position:absolute;inset:-8%;will-change:filter;
+  background:radial-gradient(ellipse 55% 55% at 50% 50%,rgba(201,168,76,.07),transparent),
+    radial-gradient(ellipse 90% 70% at 15% 85%,rgba(191,74,43,.05),transparent),var(--ink);
+}
+/* debris rings */
+.h-ring{position:absolute;border-radius:50%;will-change:transform}
+.hr1{width:520px;height:520px;border:1px solid rgba(201,168,76,.1);top:-100px;right:-100px}
+.hr2{width:260px;height:260px;border:1px solid rgba(191,74,43,.15);bottom:8%;left:4%}
+.hr3{width:90px;height:90px;background:rgba(201,168,76,.05);top:22%;left:18%}
+.hr4{width:14px;height:14px;background:var(--paper);border-radius:50%;top:58%;right:14%;opacity:.15}
+.hr5{width:7px;height:7px;background:var(--rust);border-radius:50%;top:38%;right:28%;opacity:.3}
+.hr6{width:320px;height:320px;border:1px solid rgba(61,107,79,.12);bottom:-50px;right:18%}
+.hr7{width:5px;height:5px;background:var(--gold);border-radius:50%;top:18%;left:48%;opacity:.5}
+.hr8{width:22px;height:22px;border:1px solid rgba(244,240,230,.1);top:68%;left:38%;border-radius:50%}
 
-        section {
-            position: relative;
-            width: 100%;
-            overflow: hidden;
-        }
+.h-center{position:relative;z-index:2;text-align:center;padding:0 2rem}
+.h-eye{font-size:.62rem;letter-spacing:.22em;text-transform:uppercase;
+  color:var(--gold);margin-bottom:2rem;opacity:0;transform:translateY(10px)}
+.h-title{
+  font-family:'Bebas Neue',sans-serif;
+  font-size:clamp(5rem,14vw,14rem);
+  line-height:.86;letter-spacing:.025em;margin-bottom:2.5rem;overflow:hidden;
+}
+.htl{display:block;transform:translateY(112%);opacity:0}
+.htl.out{color:transparent;-webkit-text-stroke:1px var(--paper)}
+.h-sub{font-size:.78rem;line-height:1.85;color:var(--mid);
+  max-width:380px;margin:0 auto 2.5rem;opacity:0}
+.h-btn{
+  display:inline-flex;align-items:center;gap:.7rem;
+  border:1px solid var(--gold);color:var(--gold);
+  padding:.85rem 2rem;font-size:.68rem;letter-spacing:.13em;
+  text-transform:uppercase;text-decoration:none;opacity:0;
+  transition:background .3s,color .3s,gap .3s;
+}
+.h-btn:hover{background:var(--gold);color:var(--ink);gap:1.2rem}
+.h-btn::after{content:'↓'}
+.h-line{
+  position:absolute;bottom:0;left:50%;transform:translateX(-50%);
+  width:1px;height:70px;
+  background:linear-gradient(to bottom,transparent,var(--gold));opacity:0;
+}
 
-        /* HERO SECTION */
-        .hero {
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: radial-gradient(ellipse at 30% 40%, #0c0c0c, #000000);
-        }
-        .hero-title {
-            font-size: clamp(3rem, 13vw, 9rem);
-            font-weight: 900;
-            letter-spacing: -0.02em;
-            filter: blur(22px);
-            transform: scale(1.35);
-            opacity: 0;
-            background: linear-gradient(125deg, #fff, #ff9f6e);
-            background-clip: text;
-            -webkit-background-clip: text;
-            color: transparent;
-            text-align: center;
-            will-change: transform, filter;
-        }
+/* ════════════════════════════════
+   2. 3D STACKING CARDS
+════════════════════════════════ */
+.stack-sticky{
+  position:sticky;top:0;height:100vh;
+  display:flex;align-items:center;justify-content:center;
+  overflow:hidden;
+}
+.stk-label{
+  position:absolute;top:3rem;left:3.5rem;
+  font-size:.58rem;letter-spacing:.2em;text-transform:uppercase;color:var(--mid);z-index:10;
+}
+.stk-ctr{
+  position:absolute;bottom:2.5rem;right:3.5rem;
+  font-family:'Bebas Neue',sans-serif;font-size:6rem;
+  color:rgba(255,255,255,.04);letter-spacing:-.03em;line-height:1;
+}
+.scard{
+  position:absolute;
+  width:min(660px,90vw);
+  background:var(--dark);border:1px solid rgba(255,255,255,.06);
+  padding:clamp(1.5rem,4vw,3rem);will-change:transform,opacity;
+  transform-origin:50% 115%;
+}
+.scard-bar{position:absolute;top:0;left:0;right:0;height:2px}
+.sc1 .scard-bar{background:var(--rust)} .sc1 .stag{color:var(--rust)}
+.sc2 .scard-bar{background:var(--gold)} .sc2 .stag{color:var(--gold)}
+.sc3 .scard-bar{background:var(--sage)} .sc3 .stag{color:var(--sage)}
+.sc4 .scard-bar{background:var(--mid)}  .sc4 .stag{color:var(--mid)}
+.snum{font-family:'Bebas Neue',sans-serif;font-size:4.5rem;
+  line-height:1;color:rgba(255,255,255,.05);margin-bottom:1rem}
+.stag{font-size:.58rem;letter-spacing:.15em;text-transform:uppercase;margin-bottom:.9rem}
+.stitle{font-family:'Bebas Neue',sans-serif;
+  font-size:clamp(2rem,4.5vw,3.5rem);line-height:.92;
+  letter-spacing:.025em;margin-bottom:1.1rem}
+.sdesc{font-size:.76rem;color:var(--mid);line-height:1.8;margin-bottom:1.8rem}
+.spills{display:flex;flex-wrap:wrap;gap:.4rem}
+.pill{font-size:.58rem;letter-spacing:.07em;border:1px solid rgba(255,255,255,.09);
+  padding:.22rem .75rem;color:var(--mid)}
 
-        /* ---------- STACK SECTION (CENTERED CARDS + SLOW REVEAL) ---------- */
-        .stack-section {
-            height: 420vh;  /* extended height to allow slower, luxurious motion */
-            background: #020202;
-        }
-        .stack-container {
-            position: sticky;
-            top: 0;
-            height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            perspective: 1400px;
-        }
-        .stack-card {
-            position: absolute;
-            width: min(68vw, 580px);
-            min-height: 300px;
-            background: var(--card-bg);
-            backdrop-filter: blur(14px);
-            border: 1px solid rgba(255, 255, 255, 0.12);
-            border-radius: 42px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            font-size: clamp(1.6rem, 5vw, 2.5rem);
-            font-weight: 700;
-            padding: 2rem 1.8rem;
-            box-shadow: 0 30px 50px -20px rgba(0,0,0,0.8), 0 0 0 1px rgba(255,62,0,0.1);
-            will-change: transform;
-            transition: box-shadow 0.3s ease;
-            line-height: 1.3;
-            letter-spacing: -0.01em;
-            color: #f3f3f3;
-        }
-        .stack-card small {
-            font-size: 0.8rem;
-            font-weight: 400;
-            margin-top: 1rem;
-            letter-spacing: 1px;
-            opacity: 0.75;
-            color: #ffbc8c;
-        }
-        /* Responsive cards */
-        @media (max-width: 768px) {
-            .stack-card {
-                width: 84vw;
-                min-height: 260px;
-                padding: 1.5rem;
-                font-size: 1.6rem;
-                border-radius: 36px;
-            }
-        }
-        @media (max-width: 500px) {
-            .stack-card {
-                width: 90vw;
-                min-height: 220px;
-                font-size: 1.4rem;
-                border-radius: 28px;
-            }
-        }
+/* ════════════════════════════════
+   3. PINNED CONVEYOR BELT
+════════════════════════════════ */
+.conv-sticky{
+  position:sticky;top:0;height:100vh;
+  display:flex;flex-direction:column;justify-content:center;overflow:hidden;
+}
+.conv-hdr{padding:0 3.5rem;margin-bottom:2.5rem}
+.conv-hdr-sub{font-size:.58rem;letter-spacing:.2em;text-transform:uppercase;
+  color:var(--mid);margin-bottom:.8rem}
+.conv-h{font-family:'Bebas Neue',sans-serif;
+  font-size:clamp(3rem,7vw,6rem);letter-spacing:.03em;line-height:.9}
+.conv-h em{font-style:normal;color:var(--gold)}
+.conv-track{overflow:hidden;padding:1.2rem 0;position:relative}
+.conv-track::before,.conv-track::after{
+  content:'';position:absolute;top:0;bottom:0;width:6rem;z-index:2;pointer-events:none;
+}
+.conv-track::before{left:0;background:linear-gradient(to right,var(--ink),transparent)}
+.conv-track::after{right:0;background:linear-gradient(to left,var(--ink),transparent)}
+.conv-row{display:flex;gap:1rem;width:max-content;will-change:transform}
+.ci{
+  width:230px;flex-shrink:0;border:1px solid rgba(255,255,255,.06);
+  background:var(--dark);padding:1.6rem 1.4rem;
+  position:relative;overflow:hidden;transition:border-color .3s;
+}
+.ci:hover{border-color:rgba(201,168,76,.35)}
+.ci-glyph{font-size:1.7rem;margin-bottom:.9rem;display:block}
+.ci-name{font-family:'Bebas Neue',sans-serif;font-size:1.35rem;letter-spacing:.05em;margin-bottom:.4rem}
+.ci-sub{font-size:.63rem;color:var(--mid);line-height:1.65}
+.ci-shine{position:absolute;inset:0;
+  background:linear-gradient(135deg,transparent 40%,rgba(255,255,255,.03) 50%,transparent 60%);
+  transform:translateX(-100%);transition:transform .55s ease}
+.ci:hover .ci-shine{transform:translateX(100%)}
+.conv-prog{display:flex;align-items:center;gap:1.2rem;padding:1.5rem 3.5rem 0}
+.conv-prog-bar{flex:1;height:1px;background:rgba(255,255,255,.07);position:relative}
+.conv-prog-fill{position:absolute;top:0;left:0;height:100%;background:var(--gold);width:0%}
+.conv-prog-pct{font-size:.62rem;color:var(--mid)}
 
-        /* HORIZONTAL CONVEYOR */
-        .conveyor-section {
-            background: #0b0b0b;
-        }
-        .conveyor-sticky {
-            position: sticky;
-            top: 0;
-            height: 100vh;
-            display: flex;
-            align-items: center;
-            overflow: hidden;
-        }
-        .conveyor-track {
-            display: flex;
-            gap: clamp(3rem, 9vw, 7rem);
-            padding: 0 3rem;
-            will-change: transform;
-        }
-        .conveyor-item {
-            font-size: clamp(2rem, 11vw, 6.5rem);
-            font-weight: 800;
-            white-space: nowrap;
-            background: linear-gradient(135deg, #fff, #ff9f6e);
-            background-clip: text;
-            -webkit-background-clip: text;
-            color: transparent;
-        }
+/* ════════════════════════════════
+   4. SPLIT SCREEN TRANSITION
+════════════════════════════════ */
+.split-sticky{
+  position:sticky;top:0;height:100vh;overflow:hidden;
+  display:grid;grid-template-columns:1fr 1fr;
+}
+.sp{position:relative;overflow:hidden;
+  display:flex;align-items:center;justify-content:center;padding:4rem 3rem}
+.sp-l{background:var(--paper);color:var(--ink)}
+.sp-r{background:var(--ink);color:var(--paper)}
+.sp-inner{max-width:380px;width:100%}
+.sp-label{font-size:.58rem;letter-spacing:.2em;text-transform:uppercase;margin-bottom:1rem;opacity:.45}
+.sp-title{font-family:'Bebas Neue',sans-serif;
+  font-size:clamp(2.5rem,4.5vw,4.5rem);line-height:.88;letter-spacing:.025em;margin-bottom:1.4rem}
+.sp-text{font-size:.76rem;line-height:1.85;opacity:.55;margin-bottom:2rem}
+.sp-stats{display:grid;grid-template-columns:1fr 1fr;gap:1.2rem;
+  border-top:1px solid currentColor;padding-top:1.2rem;opacity:.12}
+.sp-sn{font-family:'Bebas Neue',sans-serif;font-size:2.8rem;line-height:1;letter-spacing:-.02em}
+.sp-sl{font-size:.58rem;letter-spacing:.1em;text-transform:uppercase;opacity:.55;margin-top:.25rem}
+.split-vline{
+  position:absolute;left:50%;top:0;bottom:0;width:1px;
+  background:var(--gold);z-index:10;transform:scaleY(0);transform-origin:50% 0;
+}
 
-        /* SPLIT REVEAL */
-        .split-section {
-            display: flex;
-            flex-wrap: wrap;
-            min-height: 100vh;
-        }
-        .split-side {
-            flex: 1;
-            min-width: 250px;
-            height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: clamp(2rem, 8vw, 5rem);
-            font-weight: 900;
-            background: #0c0c0c;
-            transform: translateX(0);
-        }
-        .left-side { background: #0a0a0a; transform: translateX(-100%); }
-        .right-side { background: #151515; transform: translateX(100%); }
-        @media (max-width: 700px) {
-            .split-section { flex-direction: column; }
-            .split-side { height: 50vh; }
-        }
+/* ════════════════════════════════
+   5. TEXT FILL MASKING
+════════════════════════════════ */
+#tf{padding:11rem 3.5rem;overflow:hidden}
+.tf-label{font-size:.58rem;letter-spacing:.2em;text-transform:uppercase;
+  color:var(--mid);margin-bottom:2.5rem}
+.tf-giant{
+  font-family:'Bebas Neue',sans-serif;
+  font-size:clamp(3.5rem,9.5vw,9.5rem);
+  line-height:.88;letter-spacing:.02em;
+}
+.tf-w{
+  display:inline-block;margin-right:.12em;
+  background:linear-gradient(to right,var(--paper) 50%,rgba(255,255,255,.08) 50%);
+  background-size:200% 100%;background-position:100% 0;
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  background-clip:text;will-change:background-position;
+}
 
-        /* TEXT FILL */
-        .text-fill-section {
-            min-height: 200vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: #030303;
-        }
-        .text-fill {
-            font-size: clamp(1.8rem, 7vw, 4.5rem);
-            font-weight: 800;
-            color: rgba(255,255,255,0.1);
-            text-align: center;
-            padding: 1rem;
-            position: sticky;
-            top: 35%;
-            width: 100%;
-        }
-        .text-fill span {
-            color: var(--accent);
-            display: inline-block;
-            width: 0%;
-            overflow: hidden;
-            white-space: nowrap;
-            vertical-align: middle;
-        }
-        @media (max-width: 640px) {
-            .text-fill span { white-space: normal; display: inline; width: auto; }
-            .text-fill { font-size: 1.8rem; }
-        }
+/* ════════════════════════════════
+   6. FLOATING DEBRIS PARALLAX
+════════════════════════════════ */
+#float{position:relative;padding:10rem 3.5rem;overflow:hidden;min-height:75vh;
+  display:flex;align-items:center}
+.fb-wrap{position:absolute;inset:0;pointer-events:none}
+.fb{position:absolute;will-change:transform}
+.fb1{width:2px;height:110px;background:linear-gradient(to bottom,transparent,var(--gold),transparent);top:8%;left:14%}
+.fb2{width:75px;height:75px;border:1px solid rgba(191,74,43,.25);border-radius:50%;top:18%;right:18%}
+.fb3{width:180px;height:180px;border:1px solid rgba(201,168,76,.15);top:48%;left:58%;border-radius:2px}
+.fb4{width:5px;height:5px;background:var(--gold);border-radius:50%;top:68%;left:22%;opacity:.55}
+.fb5{width:9px;height:9px;background:var(--rust);border-radius:50%;top:28%;right:32%;opacity:.35}
+.fb6{width:2px;height:55px;background:linear-gradient(to bottom,transparent,var(--sage),transparent);top:58%;right:9%}
+.fb7{width:36px;height:36px;border:1px solid rgba(61,107,79,.3);top:78%;left:68%;border-radius:50%}
+.fb8{width:140px;height:140px;background:radial-gradient(circle,rgba(191,74,43,.07),transparent);top:12%;left:38%}
+.float-content{position:relative;z-index:2;max-width:680px}
+.float-label{font-size:.58rem;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin-bottom:1.8rem}
+.float-h{font-family:'Bebas Neue',sans-serif;
+  font-size:clamp(3rem,5.5vw,5.5rem);line-height:.9;letter-spacing:.02em;margin-bottom:1.8rem}
+.float-p{font-size:.8rem;color:var(--mid);line-height:1.9;max-width:460px}
 
-        /* PARALLAX FLOATING */
-        .float-box {
-            position: absolute;
-            width: clamp(90px, 15vw, 180px);
-            height: clamp(90px, 15vw, 180px);
-            background: rgba(255,255,255,0.03);
-            border: 1px solid rgba(255,255,255,0.15);
-            border-radius: 30px;
-            backdrop-filter: blur(6px);
-            pointer-events: none;
-        }
+/* ════════════════════════════════
+   7. SCALE CLIPPING — ZOOM CIRCLE
+════════════════════════════════ */
+.sc-sticky{
+  position:sticky;top:0;height:100vh;
+  display:flex;align-items:center;justify-content:center;
+  background:var(--ink);overflow:hidden;
+}
+.sc-bg-text{
+  position:absolute;font-family:'Bebas Neue',sans-serif;
+  font-size:22rem;letter-spacing:-.05em;
+  color:rgba(255,255,255,.025);white-space:nowrap;
+  top:50%;left:50%;transform:translate(-50%,-50%);
+  pointer-events:none;user-select:none;
+}
+.sc-circle{
+  position:absolute;width:80px;height:80px;border-radius:50%;
+  overflow:hidden;background:var(--paper);will-change:width,height;
+}
+.sc-reveal{
+  width:100vw;height:100vh;
+  background:var(--paper);color:var(--ink);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  text-align:center;padding:2rem;
+  position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  opacity:0;will-change:opacity;
+}
+.sc-rev-sub{font-size:.58rem;letter-spacing:.22em;text-transform:uppercase;
+  color:var(--mid);margin-bottom:1.5rem}
+.sc-rev-h{font-family:'Bebas Neue',sans-serif;
+  font-size:clamp(3rem,8vw,8rem);line-height:.86;letter-spacing:.02em;
+  color:var(--ink);margin-bottom:2.5rem}
+.sc-rev-btn{
+  display:inline-flex;align-items:center;gap:.7rem;
+  border:1px solid var(--ink);padding:.8rem 2rem;
+  font-size:.65rem;letter-spacing:.13em;text-transform:uppercase;
+  text-decoration:none;color:var(--ink);cursor:none;
+  transition:background .3s,color .3s,gap .3s;
+}
+.sc-rev-btn:hover{background:var(--ink);color:var(--paper);gap:1.1rem}
+.sc-rev-btn::after{content:'→'}
 
-        /* ZOOM CIRCLE */
-        .zoom-section {
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: radial-gradient(circle at 50% 50%, #1a1a1a, #000);
-        }
-        .zoom-circle {
-            width: 120px;
-            height: 120px;
-            background: var(--accent);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 800;
-            font-size: 1.1rem;
-            letter-spacing: 1px;
-            color: white;
-            box-shadow: 0 0 30px rgba(255,62,0,0.5);
-        }
+/* ════════════════════════════════
+   8. STATE INVERSION — COLOR FLIP
+════════════════════════════════ */
+.inv-sticky{position:sticky;top:0;height:100vh;overflow:hidden}
+.inv-bg{position:absolute;inset:0;background:var(--ink);will-change:background}
+.inv-circle{
+  position:absolute;width:0px;height:0px;border-radius:50%;
+  background:var(--paper);left:50%;top:50%;
+  transform:translate(-50%,-50%);will-change:width,height;
+}
+.inv-content{
+  position:absolute;inset:0;z-index:2;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  text-align:center;padding:2rem;
+}
+.inv-title{
+  font-family:'Bebas Neue',sans-serif;
+  font-size:clamp(4rem,10vw,10rem);line-height:.85;letter-spacing:.02em;
+  color:var(--paper);will-change:color;margin-bottom:1.5rem;
+}
+.inv-sub{font-size:.6rem;letter-spacing:.2em;text-transform:uppercase;color:var(--mid);will-change:color}
 
-        /* INVERSION */
-        .invert-trigger {
-            min-height: 100vh;
-            background: #faf9f8;
-            color: #0a0a0a;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: clamp(1.8rem, 6vw, 4rem);
-            font-weight: 800;
-            text-align: center;
-        }
+/* ════════════════════════════════
+   9. TYPOGRAPHY BREATHING
+════════════════════════════════ */
+#typo{padding:10rem 3.5rem;background:var(--ink)}
+.typo-label{font-size:.58rem;letter-spacing:.2em;text-transform:uppercase;
+  color:var(--mid);margin-bottom:3.5rem}
+.tyl{
+  display:block;font-family:'Bebas Neue',sans-serif;
+  font-size:clamp(2.2rem,5.5vw,6rem);line-height:.93;
+  letter-spacing:.02em;margin-bottom:.25rem;
+  color:rgba(255,255,255,.07);will-change:letter-spacing,color;
+}
 
-        /* OUTRO */
-        .outro {
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 1.2rem;
-            text-align: center;
-            background: #000;
-        }
-        .outro p {
-            font-size: clamp(1rem, 4vw, 1.3rem);
-            opacity: 0.7;
-        }
-        .outro h2 {
-            font-size: clamp(1.6rem, 5vw, 3rem);
-            font-weight: 700;
-        }
+/* ════════════════════════════════
+   CONTACT
+════════════════════════════════ */
+#contact{padding:12rem 3.5rem 8rem;position:relative;overflow:hidden;background:var(--ink)}
+.ct-glow{position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(ellipse 65% 45% at 50% 100%,rgba(201,168,76,.07),transparent)}
+.ct-label{font-size:.58rem;letter-spacing:.22em;text-transform:uppercase;color:var(--gold);margin-bottom:1.8rem}
+.ct-h{font-family:'Bebas Neue',sans-serif;
+  font-size:clamp(3.5rem,11vw,11rem);line-height:.83;letter-spacing:.015em;margin-bottom:4rem}
+.ct-h span{color:transparent;-webkit-text-stroke:1px rgba(244,240,230,.2)}
+.ct-btn{
+  display:inline-flex;align-items:center;gap:.8rem;
+  background:var(--gold);color:var(--ink);
+  padding:1rem 2.5rem;font-size:.7rem;font-weight:600;
+  letter-spacing:.1em;text-transform:uppercase;
+  text-decoration:none;cursor:none;
+  transition:gap .3s,background .3s;
+}
+.ct-btn:hover{gap:1.5rem;background:var(--paper)}
+.ct-btn::after{content:'→'}
+.ct-links{display:flex;flex-wrap:wrap;gap:1.8rem;
+  margin-top:4.5rem;border-top:1px solid rgba(255,255,255,.06);padding-top:1.8rem}
+.ct-link{font-size:.62rem;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--mid);text-decoration:none;transition:color .3s}
+.ct-link:hover{color:var(--gold)}
+footer{border-top:1px solid rgba(255,255,255,.05);
+  padding:1.6rem 3.5rem;display:flex;justify-content:space-between;
+  align-items:center;background:var(--ink)}
+footer span{font-size:.6rem;color:var(--mid);letter-spacing:.06em}
 
-        /* Responsive fix for blank areas */
-        html, body { width: 100%; }
-    </style>
+/* ─── RESPONSIVE ─── */
+@media(max-width:900px){
+  nav{padding:1.1rem 1.5rem}
+  .nlinks{display:none}
+  .stk-label{left:1.5rem}
+  .stk-ctr{right:1.5rem}
+  .scard{width:92vw;padding:1.8rem 1.4rem}
+  .conv-hdr,.conv-prog{padding-left:1.5rem;padding-right:1.5rem}
+  .split-sticky{grid-template-columns:1fr}
+  .sp-r,.split-vline{display:none}
+  #tf,#float,#typo,#contact{padding-left:1.5rem;padding-right:1.5rem}
+  footer{flex-direction:column;gap:.7rem;text-align:center;padding:1.4rem}
+}
+@media(max-width:500px){
+  .h-title{font-size:clamp(4rem,18vw,6rem)}
+  .stitle{font-size:1.9rem}
+  .tf-giant{font-size:clamp(2.5rem,12vw,4rem)}
+  .sc-rev-h{font-size:clamp(2.5rem,12vw,5rem)}
+  .inv-title{font-size:clamp(3rem,13vw,6rem)}
+  .tyl{font-size:clamp(1.8rem,9vw,3rem)}
+  .ct-h{font-size:clamp(2.5rem,12vw,5rem)}
+}
+</style>
 </head>
 <body>
 
-<div class="scroll-progress"></div>
+<div id="cur"></div>
+<div id="cur2"></div>
+<div id="pbar"></div>
 
-<main>
-    <section class="hero">
-        <h1 class="hero-title">CINEMATIC SLOW</h1>
-    </section>
+<nav>
+  <a class="nlogo" href="#">KOVACS</a>
+  <ul class="nlinks">
+    <li><a href="#s-stack">Work</a></li>
+    <li><a href="#s-conv">Services</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+</nav>
 
-    <!-- STACK SECTION: Cards centered, slower stacking, enough time to read -->
-    <section class="stack-section">
-        <div class="stack-container">
-            <div class="stack-card" style="z-index: 3;">
-                ✦ THE VISION ✦
-                <small>depth of perspective</small>
-            </div>
-            <div class="stack-card" style="z-index: 2;">
-                ⟡ THE CRAFT ⟡
-                <small>precision in motion</small>
-            </div>
-            <div class="stack-card" style="z-index: 1;">
-                ⚡ THE RHYTHM ⚡
-                <small>slow cinematic stack</small>
-            </div>
+<!-- ══ 1. HERO ══════════════════════════ -->
+<section id="hero">
+  <div class="h-bg" id="hBg"></div>
+  <div class="h-ring hr1"></div><div class="h-ring hr2"></div>
+  <div class="h-ring hr3"></div><div class="h-ring hr4"></div>
+  <div class="h-ring hr5"></div><div class="h-ring hr6"></div>
+  <div class="h-ring hr7"></div><div class="h-ring hr8"></div>
+  <div class="h-center">
+    <p class="h-eye">CREATIVE DEVELOPER · MOTION DESIGNER · 2025</p>
+    <h1 class="h-title">
+      <span class="htl">ALEX</span>
+      <span class="htl out">KOVACS</span>
+    </h1>
+    <p class="h-sub">I build cinematic digital experiences where code meets craft. Every pixel breathes, every scroll tells a story.</p>
+    <a href="#s-stack" class="h-btn">EXPLORE WORK</a>
+  </div>
+  <div class="h-line" id="hLine"></div>
+</section>
+
+<!-- ══ 2. 3D STACKING ═══════════════════ -->
+<div id="s-stack"></div>
+<div id="stackPin" style="position:relative">
+  <div class="stack-sticky">
+    <div class="stk-label">02 / SELECTED WORK</div>
+    <div class="stk-ctr" id="stkCtr">01</div>
+
+    <div class="scard sc1" id="sc1">
+      <div class="scard-bar"></div>
+      <div class="snum">01</div>
+      <div class="stag">UI/UX · WEBGL · 2024</div>
+      <h3 class="stitle">NEBULA ANALYTICS</h3>
+      <p class="sdesc">Real-time 3D data visualization platform. 200k daily users across 40 countries. Rebuilt the entire rendering pipeline around custom WebGL shaders for 60fps performance.</p>
+      <div class="spills"><span class="pill">React</span><span class="pill">Three.js</span><span class="pill">WebGL</span><span class="pill">D3</span></div>
+    </div>
+    <div class="scard sc2" id="sc2">
+      <div class="scard-bar"></div>
+      <div class="snum">02</div>
+      <div class="stag">E-COMMERCE · MOTION · 2024</div>
+      <h3 class="stitle">AURA LUXURY STORE</h3>
+      <p class="sdesc">Scroll-driven luxury commerce experience with cinematic product reveals. +340% conversion in Q1. FWA Site of the Day. Every interaction precisely choreographed.</p>
+      <div class="spills"><span class="pill">Next.js</span><span class="pill">GSAP</span><span class="pill">Shopify</span><span class="pill">Lenis</span></div>
+    </div>
+    <div class="scard sc3" id="sc3">
+      <div class="scard-bar"></div>
+      <div class="snum">03</div>
+      <div class="stag">AI PRODUCT · SaaS · 2023</div>
+      <h3 class="stitle">SYNAPSE AI PLATFORM</h3>
+      <p class="sdesc">Multimodal AI workspace built for teams. 50k users in beta. Voice, vision, and language in a single unified canvas. Zero-latency streaming interface.</p>
+      <div class="spills"><span class="pill">TypeScript</span><span class="pill">Python</span><span class="pill">OpenAI</span><span class="pill">Supabase</span></div>
+    </div>
+    <div class="scard sc4" id="sc4">
+      <div class="scard-bar"></div>
+      <div class="snum">04</div>
+      <div class="stag">BRANDING · IDENTITY · 2023</div>
+      <h3 class="stitle">VERTEX AGENCY</h3>
+      <p class="sdesc">Complete visual identity and interactive website for Berlin's fastest growing agency. CSS-only animations, zero JS overhead, perfect Lighthouse scores on every page.</p>
+      <div class="spills"><span class="pill">Webflow</span><span class="pill">GSAP</span><span class="pill">Lottie</span><span class="pill">Figma</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ 3. PINNED CONVEYOR ══════════════ -->
+<div id="s-conv"></div>
+<div id="convPin" style="position:relative">
+  <div class="conv-sticky">
+    <div class="conv-hdr">
+      <p class="conv-hdr-sub">03 / SERVICES</p>
+      <h2 class="conv-h">WHAT I <em>BUILD</em></h2>
+    </div>
+    <div class="conv-track">
+      <div class="conv-row" id="convRow">
+        <div class="ci"><span class="ci-glyph">⚡</span><div class="ci-name">FRONT-END</div><div class="ci-sub">React · Vue · Vanilla. Pixel-perfect implementations at every breakpoint.</div><div class="ci-shine"></div></div>
+        <div class="ci"><span class="ci-glyph">🎭</span><div class="ci-name">MOTION</div><div class="ci-sub">GSAP · Framer · Lottie. Animations that feel physical, not scripted.</div><div class="ci-shine"></div></div>
+        <div class="ci"><span class="ci-glyph">🔮</span><div class="ci-name">UI / UX</div><div class="ci-sub">Figma design systems. Functional beauty across every state.</div><div class="ci-shine"></div></div>
+        <div class="ci"><span class="ci-glyph">🌐</span><div class="ci-name">3D / WEBGL</div><div class="ci-sub">Three.js · R3F · Shaders. Immersive scenes running at 60fps.</div><div class="ci-shine"></div></div>
+        <div class="ci"><span class="ci-glyph">🛠️</span><div class="ci-name">FULL-STACK</div><div class="ci-sub">Node · Next · DB. End-to-end architecture and delivery.</div><div class="ci-shine"></div></div>
+        <div class="ci"><span class="ci-glyph">📱</span><div class="ci-name">MOBILE</div><div class="ci-sub">React Native · PWA. Native feel on every screen, zero compromise.</div><div class="ci-shine"></div></div>
+        <div class="ci"><span class="ci-glyph">🚀</span><div class="ci-name">PERFORMANCE</div><div class="ci-sub">Lighthouse 100 as standard. Speed is the first feature I design.</div><div class="ci-shine"></div></div>
+        <div class="ci"><span class="ci-glyph">♿</span><div class="ci-name">ACCESSIBILITY</div><div class="ci-sub">WCAG AA+ by default. Inclusive interaction throughout.</div><div class="ci-shine"></div></div>
+      </div>
+    </div>
+    <div class="conv-prog">
+      <div class="conv-prog-bar"><div class="conv-prog-fill" id="cpFill"></div></div>
+      <span class="conv-prog-pct" id="cpPct">0%</span>
+    </div>
+  </div>
+</div>
+
+<!-- ══ 4. SPLIT SCREEN ═════════════════ -->
+<div id="splitPin" style="position:relative">
+  <div class="split-sticky">
+    <div class="split-vline" id="splitVLine"></div>
+    <div class="sp sp-l">
+      <div class="sp-inner" id="spL">
+        <p class="sp-label">04 / APPROACH — DESIGN</p>
+        <h2 class="sp-title">OBSESS OVER DETAIL</h2>
+        <p class="sp-text">Design that earns attention. Every component is a deliberate decision. The distance between good and great is made of details no one consciously notices — but everyone feels.</p>
+        <div class="sp-stats">
+          <div><div class="sp-sn">48+</div><div class="sp-sl">Projects</div></div>
+          <div><div class="sp-sn">12</div><div class="sp-sl">Awards</div></div>
         </div>
-    </section>
-
-    <!-- HORIZONTAL CONVEYOR -->
-    <section class="conveyor-section">
-        <div class="conveyor-sticky">
-            <div class="conveyor-track">
-                <div class="conveyor-item">SLOW MOTION</div>
-                <div class="conveyor-item">◈</div>
-                <div class="conveyor-item">HORIZONTAL</div>
-                <div class="conveyor-item">◈</div>
-                <div class="conveyor-item">RESPONSIVE</div>
-                <div class="conveyor-item">◈</div>
-                <div class="conveyor-item">INFINITE</div>
-            </div>
+      </div>
+    </div>
+    <div class="sp sp-r">
+      <div class="sp-inner" id="spR">
+        <p class="sp-label">04 / APPROACH — ENGINEERING</p>
+        <h2 class="sp-title">BUILD TO LAST</h2>
+        <p class="sp-text">Code as architecture. Performance, accessibility, and maintainability are design constraints I work within — not afterthoughts bolted on. Every project ships above Lighthouse 95.</p>
+        <div class="sp-stats" style="border-color:rgba(244,240,230,.12)">
+          <div><div class="sp-sn">5yr</div><div class="sp-sl">Experience</div></div>
+          <div><div class="sp-sn">∞</div><div class="sp-sl">Coffee</div></div>
         </div>
-    </section>
+      </div>
+    </div>
+  </div>
+</div>
 
-    <!-- SPLIT -->
-    <section class="split-section">
-        <div class="split-side left-side">CREATIVE</div>
-        <div class="split-side right-side">CORE</div>
-    </section>
+<!-- ══ 5. TEXT FILL ════════════════════ -->
+<section id="tf">
+  <p class="tf-label">05 / PHILOSOPHY</p>
+  <div class="tf-giant" id="tfGiant">
+    <span class="tf-w">THE</span><span class="tf-w">BEST</span>
+    <span class="tf-w">INTERFACES</span><br>
+    <span class="tf-w">DON'T</span><span class="tf-w">FEEL</span>
+    <span class="tf-w">LIKE</span><br>
+    <span class="tf-w">INTERFACES.</span><br>
+    <span class="tf-w">THEY</span><span class="tf-w">FEEL</span>
+    <span class="tf-w">LIKE</span><br>
+    <span class="tf-w">EXPERIENCE.</span>
+  </div>
+</section>
 
-    <!-- TEXT FILL -->
-    <section class="text-fill-section">
-        <div class="text-fill">THE FUTURE IS <span>THE FUTURE IS NOW SLOW</span></div>
-    </section>
+<!-- ══ 6. FLOATING DEBRIS ══════════════ -->
+<section id="float">
+  <div class="fb-wrap">
+    <div class="fb fb1" data-s="-0.4"></div><div class="fb fb2" data-s="0.6"></div>
+    <div class="fb fb3" data-s="-0.22"></div><div class="fb fb4" data-s="0.9"></div>
+    <div class="fb fb5" data-s="-0.7"></div><div class="fb fb6" data-s="0.35"></div>
+    <div class="fb fb7" data-s="-0.5"></div><div class="fb fb8" data-s="0.15"></div>
+  </div>
+  <div class="float-content">
+    <p class="float-label">06 / ABOUT</p>
+    <h2 class="float-h">BUILDING AT THE INTERSECTION OF CODE &amp; CRAFT</h2>
+    <p class="float-p">5 years crafting digital products for startups and global brands. I obsess over the invisible: the easing curve, the micro-pause, the weight of a shadow. Available for new collaborations starting Q1 2025.</p>
+  </div>
+</section>
 
-    <!-- PARALLAX DEBRIS -->
-    <section style="min-height: 150vh; position: relative; background: #080808;">
-        <div class="float-box" style="top: 15%; left: 7%;"></div>
-        <div class="float-box" style="top: 48%; left: 82%;"></div>
-        <div class="float-box" style="top: 72%; left: 12%;"></div>
-        <div class="float-box" style="top: 88%; left: 68%; width: 130px; height: 130px;"></div>
-        <div style="display: flex; align-items: center; justify-content: center; height: 100%; position: relative; z-index: 9;">
-            <h2 style="font-size: clamp(2rem, 7vw, 4rem); font-weight: 800; background: linear-gradient(145deg, #fff, #aaa); background-clip: text; -webkit-background-clip: text; color: transparent;">PARALLAX DRIFT</h2>
-        </div>
-    </section>
+<!-- ══ 7. SCALE CLIPPING ═══════════════ -->
+<div id="scPin" style="position:relative">
+  <div class="sc-sticky">
+    <div class="sc-bg-text">KOVACS</div>
+    <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;z-index:1;gap:.8rem">
+      <p style="font-size:.58rem;letter-spacing:.22em;text-transform:uppercase;color:var(--mid)">07 / IDENTITY</p>
+      <h2 style="font-family:'Bebas Neue',sans-serif;font-size:clamp(3rem,7vw,7rem);letter-spacing:.02em;color:var(--paper);line-height:.88">SCROLL TO<br>REVEAL</h2>
+    </div>
+    <div class="sc-circle" id="scCircle">
+      <div class="sc-reveal" id="scReveal">
+        <p class="sc-rev-sub">Open to work · Based in Berlin</p>
+        <h2 class="sc-rev-h">LET'S<br>CREATE<br>TOGETHER</h2>
+        <a href="#contact" class="sc-rev-btn">HIRE ME</a>
+      </div>
+    </div>
+  </div>
+</div>
 
-    <!-- ZOOM -->
-    <section class="zoom-section">
-        <div class="zoom-circle">ENTER</div>
-    </section>
+<!-- ══ 8. STATE INVERSION ══════════════ -->
+<div id="invPin" style="position:relative">
+  <div class="inv-sticky">
+    <div class="inv-bg" id="invBg"></div>
+    <div class="inv-circle" id="invCircle"></div>
+    <div class="inv-content">
+      <h2 class="inv-title" id="invTitle">DARK<br>TO<br>LIGHT</h2>
+      <p class="inv-sub" id="invSub">08 / STATE TRANSITION</p>
+    </div>
+  </div>
+</div>
 
-    <!-- INVERSION -->
-    <section class="invert-trigger">
-        <h2>CHROMATIC ABYSS</h2>
-    </section>
+<!-- ══ 9. TYPOGRAPHY BREATHING ══════════ -->
+<section id="typo">
+  <p class="typo-label">09 / MANIFESTO</p>
+  <div id="typoWrap">
+    <span class="tyl" data-ls="0.22em">MOTION IS MEANING.</span>
+    <span class="tyl" data-ls="0.08em">DETAIL IS RESPECT.</span>
+    <span class="tyl" data-ls="0.18em">PERFORMANCE IS DESIGN.</span>
+    <span class="tyl" data-ls="0.06em">CODE IS CRAFT.</span>
+    <span class="tyl" data-ls="0.14em">SCROLL IS CINEMA.</span>
+  </div>
+</section>
 
-    <section class="outro">
-        <p>END OF CYCLE</p>
-        <h2>⟳ SCROLL AGAIN SLOWLY ⟳</h2>
-    </section>
-</main>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
-<script src="https://unpkg.com/@studio-freight/lenis@1.0.42/dist/lenis.min.js"></script>
+<!-- ══ CONTACT ══════════════════════════ -->
+<section id="contact">
+  <div class="ct-glow"></div>
+  <p class="ct-label">10 / LET'S TALK</p>
+  <h2 class="ct-h">START<br>SOME<span>THING</span><br>GREAT</h2>
+  <a href="mailto:hello@alexkovacs.io" class="ct-btn">SEND A MESSAGE</a>
+  <div class="ct-links">
+    <a href="#" class="ct-link">GITHUB</a>
+    <a href="#" class="ct-link">LINKEDIN</a>
+    <a href="#" class="ct-link">TWITTER / X</a>
+    <a href="#" class="ct-link">DRIBBBLE</a>
+    <a href="#" class="ct-link">READ.CV</a>
+  </div>
+</section>
+<footer>
+  <span>© 2025 ALEX KOVACS</span>
+  <span>GSAP · SCROLLTRIGGER · HTML</span>
+</footer>
 
 <script>
-    (function() {
-        gsap.registerPlugin(ScrollTrigger);
-        
-        // ---------- LENIS SMOOTH SCROLL (leisurely, more readable) ----------
-        const lenis = new Lenis({
-            duration: 1.4,          // slower default scroll feel
-            easing: (t) => Math.min(1, 1.001 - Math.pow(2, -12 * t)),
-            smoothWheel: true,
-            wheelMultiplier: 0.85,
-            touchMultiplier: 1.1,
-        });
-        
-        function raf(time) {
-            lenis.raf(time);
-            requestAnimationFrame(raf);
-        }
-        requestAnimationFrame(raf);
-        
-        lenis.on('scroll', ScrollTrigger.update);
-        gsap.ticker.add((time) => {
-            lenis.raf(time * 1000);
-        });
-        gsap.ticker.lagSmoothing(0);
-        
-        // progress bar
-        gsap.to(".scroll-progress", {
-            width: "100%",
-            scrollTrigger: { trigger: "body", start: "top top", end: "bottom bottom", scrub: 0.4 }
-        });
-        
-        // Hero blur
-        gsap.to(".hero-title", {
-            filter: "blur(0px)",
-            scale: 1,
-            opacity: 1,
-            scrollTrigger: { trigger: ".hero", start: "top top", end: "bottom 60%", scrub: 0.7 }
-        });
-        
-        // ==========  STACK CARDS – CENTERED & SLOWER MOVEMENT ==========
-        // GOAL: Cards remain centered in view for a long time, move upwards very slowly
-        // No sudden scroll-out, give time to read all content before next card overtakes.
-        // We'll use a smooth 'y' transform that moves each card at a relaxed pace
-        // and ensure each card stays in the center region for most of the scroll range.
-        
-        const cards = gsap.utils.toArray(".stack-card");
-        const stackSection = document.querySelector(".stack-section");
-        
-        // we want a slower, more elegant stack: each card moves upwards with ease,
-        // but remains visible in the middle area.
-        // Instead of aggressive yPercent, we animate y from 0 to -window.innerHeight * 0.65
-        // and scale down softly. We also stagger the start positions so first card doesn't fly away.
-        
-        // More controlled: each card will have its own scroll animation that spans a large scroll range,
-        // and the movement is gradual, allowing full readability.
-        
-        cards.forEach((card, idx) => {
-            // For slower and centered: we animate Y position from 0vh to -55vh (so it stays largely inside view)
-            // and scaling factor decreases slightly. The scroll range is long: 180% of section height
-            const startOffset = idx * 18;     // first card starts earlier but moves slower
-            const endOffset = 100 + (idx * 12);
-            
-            // target Y displacement (upward but not completely disappearing too fast)
-            const moveY = -window.innerHeight * 0.52;   // moves half viewport up, stays legible
-            const targetScale = 0.85 - (idx * 0.045);
-            
-            gsap.fromTo(card,
-                {
-                    y: 0,
-                    scale: 1,
-                    opacity: 1,
-                },
-                {
-                    y: moveY,
-                    scale: targetScale,
-                    opacity: 0.7,
-                    ease: "none",
-                    scrollTrigger: {
-                        trigger: ".stack-section",
-                        start: `top+=${startOffset}% top`,
-                        end: `bottom-=${(cards.length - idx) * 8}% top`,
-                        scrub: 1.5,        // slower scrub = smoother, more time to reveal
-                        invalidateOnRefresh: true,
-                    }
-                }
-            );
-        });
-        
-        // Additional refinement: for the first card (THE VISION), we delay its upward movement
-        // so it stays centered for a much longer period — ensures user reads all content
-        gsap.fromTo(cards[0],
-            { y: 0, scale: 1 },
-            {
-                y: -window.innerHeight * 0.48,
-                scale: 0.92,
-                scrollTrigger: {
-                    trigger: ".stack-section",
-                    start: "top+=2% top",
-                    end: "bottom-15% top",
-                    scrub: 1.6,
-                }
-            }
-        );
-        
-        // second card also lingers elegantly
-        if(cards[1]) {
-            gsap.fromTo(cards[1],
-                { y: 0, scale: 1 },
-                {
-                    y: -window.innerHeight * 0.52,
-                    scale: 0.88,
-                    scrollTrigger: {
-                        trigger: ".stack-section",
-                        start: "top+=20% top",
-                        end: "bottom-8% top",
-                        scrub: 1.5,
-                    }
-                }
-            );
-        }
-        
-        // HORIZONTAL CONVEYOR (smooth)
-        let conveyorTrack = document.querySelector(".conveyor-track");
-        function updateConveyor() {
-            if(!conveyorTrack) return;
-            const trackWidth = conveyorTrack.scrollWidth;
-            const viewW = window.innerWidth;
-            let movePercent = (trackWidth - viewW) / trackWidth * 100;
-            movePercent = Math.min(72, Math.max(45, movePercent));
-            ScrollTrigger.getAll().forEach(st => {
-                if(st.vars.trigger === ".conveyor-section") st.kill();
-            });
-            gsap.to(".conveyor-track", {
-                x: `-${movePercent}%`,
-                ease: "none",
-                scrollTrigger: {
-                    trigger: ".conveyor-section",
-                    start: "top top",
-                    end: "bottom bottom",
-                    pin: true,
-                    scrub: 0.9,
-                    invalidateOnRefresh: true,
-                }
-            });
-        }
-        window.addEventListener("resize", () => { updateConveyor(); setTimeout(() => ScrollTrigger.refresh(), 100); });
-        setTimeout(updateConveyor, 200);
-        
-        // SPLIT REVEAL (slower)
-        gsap.to(".left-side", {
-            x: "0%",
-            duration: 1.2,
-            scrollTrigger: { trigger: ".split-section", start: "top 85%", end: "top 25%", scrub: 1.2 }
-        });
-        gsap.to(".right-side", {
-            x: "0%",
-            duration: 1.2,
-            scrollTrigger: { trigger: ".split-section", start: "top 85%", end: "top 25%", scrub: 1.2 }
-        });
-        
-        // TEXT FILL (slower reveal)
-        if (window.innerWidth > 640) {
-            gsap.to(".text-fill span", {
-                width: "100%",
-                scrollTrigger: { trigger: ".text-fill-section", start: "top center", end: "bottom 25%", pin: true, scrub: 1.1 }
-            });
+gsap.registerPlugin(ScrollTrigger);
+
+const lerp=(a,b,t)=>a+(b-a)*t;
+const clamp=(v,lo,hi)=>Math.max(lo,Math.min(hi,v));
+
+/* ─── CURSOR ─── */
+const cur=document.getElementById('cur'),cur2=document.getElementById('cur2');
+let mx=innerWidth*.5,my=innerHeight*.5,rx=mx,ry=my;
+addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY});
+(function tc(){
+  rx=lerp(rx,mx,.12);ry=lerp(ry,my,.12);
+  cur.style.left=mx+'px';cur.style.top=my+'px';
+  cur2.style.left=rx+'px';cur2.style.top=ry+'px';
+  requestAnimationFrame(tc);
+})();
+document.querySelectorAll('a,button,.scard,.ci,.ct-btn,.sc-rev-btn').forEach(el=>{
+  el.addEventListener('mouseenter',()=>document.body.classList.add('h'));
+  el.addEventListener('mouseleave',()=>document.body.classList.remove('h'));
+});
+
+/* ─── PROGRESS BAR ─── */
+addEventListener('scroll',()=>{
+  document.getElementById('pbar').style.width=
+    (scrollY/(document.body.scrollHeight-innerHeight)*100)+'%';
+});
+
+/* ══════════════════════════════════
+   1. HERO — LENS BLUR
+══════════════════════════════════ */
+gsap.timeline({delay:.25})
+  .to('.htl',{y:0,opacity:1,stagger:.15,duration:1.4,ease:'expo.out'})
+  .to('.h-eye',{opacity:1,y:0,duration:.8,ease:'power3.out'},'-=.7')
+  .to('.h-sub',{opacity:1,duration:.8,ease:'power3.out'},'-=.4')
+  .to('.h-btn',{opacity:1,duration:.6},'-=.3')
+  .to('#hLine',{opacity:1,duration:.5},'-=.2');
+
+// Blur effect tied to scroll
+gsap.to('#hBg',{
+  filter:'blur(22px)',opacity:.4,
+  scrollTrigger:{trigger:'#hero',start:'top top',end:'bottom top',scrub:1.1}
+});
+gsap.to('.h-center',{
+  y:-140,opacity:0,
+  scrollTrigger:{trigger:'#hero',start:'top top',end:'bottom top',scrub:.85}
+});
+// Debris rings at different parallax speeds
+const dSpeeds=[-0.3,0.55,-0.18,0.85,-0.55,0.28,-0.75,0.42];
+document.querySelectorAll('.h-ring').forEach((el,i)=>{
+  gsap.to(el,{
+    y:dSpeeds[i]*220,
+    scrollTrigger:{trigger:'#hero',start:'top top',end:'bottom top',scrub:1}
+  });
+});
+
+/* ══════════════════════════════════
+   2. 3D STACKING CARDS
+══════════════════════════════════ */
+(()=>{
+  const cards=gsap.utils.toArray('.scard');
+  const SEG=innerHeight*.85;
+  const PIN_H=cards.length*SEG+innerHeight*.5;
+  document.getElementById('stackPin').style.height=PIN_H+'px';
+
+  gsap.set(cards,{y:580,opacity:0,rotateX:20,scale:.86,transformPerspective:1200});
+
+  cards.forEach((card,i)=>{
+    const tl=gsap.timeline({
+      scrollTrigger:{
+        trigger:'#stackPin',
+        start:`top+=${i*SEG} top`,
+        end:`top+=${i*SEG+SEG} top`,
+        scrub:.8,
+      }
+    });
+
+    // current card slides up
+    tl.to(card,{y:0,opacity:1,rotateX:0,scale:1,duration:1,ease:'power3.out'});
+
+    // previous cards push back (3D stack)
+    for(let j=0;j<i;j++){
+      tl.to(cards[j],{
+        scale:1-(i-j)*.055,
+        y:-(i-j)*24,
+        opacity:Math.max(0,1-(i-j)*.2),
+        duration:1
+      },0);
+    }
+
+    // counter update
+    tl.to({},{duration:1,onUpdate(){
+      if(this.progress()>.35)
+        document.getElementById('stkCtr').textContent=String(i+1).padStart(2,'0');
+    }},0);
+  });
+})();
+
+/* ══════════════════════════════════
+   3. PINNED CONVEYOR BELT
+══════════════════════════════════ */
+(()=>{
+  const row=document.getElementById('convRow');
+  const track=row.parentElement;
+
+  // duplicate for overflow
+  row.innerHTML+=row.innerHTML;
+
+  const pinH=innerHeight*3.2;
+  document.getElementById('convPin').style.height=pinH+'px';
+  const maxX=row.scrollWidth-track.offsetWidth;
+
+  gsap.to(row,{
+    x:()=>-(maxX*.52),
+    ease:'none',
+    scrollTrigger:{
+      trigger:'#convPin',start:'top top',end:'bottom bottom',
+      scrub:1.1,
+      onUpdate(s){
+        const p=Math.round(s.progress*100);
+        document.getElementById('cpFill').style.width=p+'%';
+        document.getElementById('cpPct').textContent=p+'%';
+      }
+    }
+  });
+})();
+
+/* ══════════════════════════════════
+   4. SPLIT SCREEN
+══════════════════════════════════ */
+(()=>{
+  document.getElementById('splitPin').style.height=(innerHeight*2.8)+'px';
+
+  gsap.set('#spL',{x:-90,opacity:0});
+  gsap.set('#spR',{x:90,opacity:0});
+  gsap.set('#splitVLine',{scaleY:0});
+  gsap.set('.sp-stats',{opacity:.08});
+
+  const tl=gsap.timeline({
+    scrollTrigger:{
+      trigger:'#splitPin',start:'top top',end:'bottom bottom',scrub:.9
+    }
+  });
+  tl.to('#splitVLine',{scaleY:1,duration:.25},0)
+    .to('#spL',{x:0,opacity:1,duration:.4},'.08')
+    .to('#spR',{x:0,opacity:1,duration:.4},'.08')
+    .to('.sp-stats',{opacity:1,duration:.35},'.5');
+})();
+
+/* ══════════════════════════════════
+   5. TEXT FILL MASKING
+══════════════════════════════════ */
+(()=>{
+  const words=gsap.utils.toArray('.tf-w');
+  words.forEach((w,i)=>{
+    gsap.to(w,{
+      backgroundPosition:'-1% 0',ease:'none',
+      scrollTrigger:{
+        trigger:'#tf',
+        start:`top+=${i*(85/words.length)}% center`,
+        end:`top+=${(i+1)*(92/words.length)}% center`,
+        scrub:.55
+      }
+    });
+  });
+})();
+
+/* ══════════════════════════════════
+   6. FLOATING DEBRIS PARALLAX
+══════════════════════════════════ */
+document.querySelectorAll('.fb').forEach(el=>{
+  const s=parseFloat(el.dataset.s||'.3');
+  gsap.to(el,{
+    y:s*300,ease:'none',
+    scrollTrigger:{trigger:'#float',start:'top bottom',end:'bottom top',scrub:1.5}
+  });
+});
+gsap.to('.fb3',{rotation:200,scrollTrigger:{trigger:'#float',start:'top bottom',end:'bottom top',scrub:2}});
+
+/* ══════════════════════════════════
+   7. SCALE CLIPPING — ZOOM CIRCLE
+══════════════════════════════════ */
+(()=>{
+  const circle=document.getElementById('scCircle');
+  const reveal=document.getElementById('scReveal');
+  const diag=Math.sqrt(innerWidth**2+innerHeight**2)*2.3;
+
+  document.getElementById('scPin').style.height=(innerHeight*3.8)+'px';
+
+  const tl=gsap.timeline({
+    scrollTrigger:{
+      trigger:'#scPin',start:'top top',end:'bottom bottom',scrub:1
+    }
+  });
+  tl.to(circle,{width:diag,height:diag,borderRadius:'50%',duration:1,ease:'power2.inOut'})
+    .to(reveal,{opacity:1,duration:.5,ease:'power2.out'},'.35');
+})();
+
+/* ══════════════════════════════════
+   8. STATE INVERSION — COLOR FLIP
+══════════════════════════════════ */
+(()=>{
+  const bg=document.getElementById('invBg');
+  const circ=document.getElementById('invCircle');
+  const title=document.getElementById('invTitle');
+  const sub=document.getElementById('invSub');
+  const diag=Math.sqrt(innerWidth**2+innerHeight**2)*2.3;
+
+  document.getElementById('invPin').style.height=(innerHeight*2.8)+'px';
+
+  gsap.timeline({
+    scrollTrigger:{
+      trigger:'#invPin',start:'top top',end:'bottom bottom',scrub:.9,
+      onUpdate(s){
+        const p=s.progress;
+        if(p<.48){
+          bg.style.background='var(--ink)';
+          title.style.color='var(--paper)';
+          sub.style.color='var(--mid)';
         } else {
-            gsap.to(".text-fill span", {
-                width: "100%",
-                scrollTrigger: { trigger: ".text-fill-section", start: "top 70%", end: "bottom 35%", scrub: 1 }
-            });
+          bg.style.background='var(--paper)';
+          title.style.color='var(--ink)';
+          sub.style.color='#8a8278';
         }
-        
-        // PARALLAX FLOATING BOXES (gentle movement)
-        gsap.utils.toArray(".float-box").forEach((box, idx) => {
-            gsap.to(box, {
-                y: -280 + (idx * 30),
-                rotation: 320 + (idx * 45),
-                scrollTrigger: { trigger: box.parentElement, start: "top bottom", end: "bottom top", scrub: 1.8 }
-            });
-        });
-        
-        // ZOOM CIRCLE (slow dramatic zoom)
-        gsap.to(".zoom-circle", {
-            scale: 48,
-            borderRadius: "0%",
-            backgroundColor: "#ff5722",
-            scrollTrigger: { trigger: ".zoom-section", start: "top top", end: "bottom bottom", pin: true, scrub: 1.2 }
-        });
-        
-        // BACKGROUND INVERSION with smooth transition
-        const invertTimeline = gsap.timeline({
-            scrollTrigger: { trigger: ".invert-trigger", start: "top 40%", end: "bottom 45%", scrub: 1 }
-        });
-        invertTimeline.to("body", { backgroundColor: "#fefefe", color: "#000000", duration: 0.8 }, 0);
-        invertTimeline.to(".invert-trigger h2", { color: "#ff3e00", scale: 1.02 }, 0);
-        
-        // revert to dark after inversion ends (outro)
-        gsap.to("body", {
-            backgroundColor: "#000000",
-            color: "#ffffff",
-            scrollTrigger: { trigger: ".outro", start: "top 65%", end: "top 15%", scrub: 1.1 }
-        });
-        
-        // OUTRO letter spacing
-        gsap.from(".outro h2", {
-            letterSpacing: "45px",
-            opacity: 0,
-            scrollTrigger: { trigger: ".outro", start: "top 85%", end: "bottom 30%", scrub: 1 }
-        });
-        
-        // ====== ADDITIONAL: ensure the cards are perfectly centered on all devices ======
-        function centerCardsAdjust() {
-            gsap.set(".stack-card", { clearProps: "transform" });
-            ScrollTrigger.refresh();
-            lenis.resize();
-        }
-        window.addEventListener("resize", () => {
-            centerCardsAdjust();
-            setTimeout(() => {
-                ScrollTrigger.refresh();
-            }, 150);
-        });
-        
-        // First load: make sure the stacking cards are not shifted, and there's no blank area before second scroll
-        setTimeout(() => {
-            ScrollTrigger.refresh();
-            lenis.scrollTo(0, { immediate: true });
-        }, 80);
-        
-        // MANUAL FIX: increase stack-section height consistency to avoid blank zones
-        // slow movement means we have more scrolling room, no abrupt empty space before second scroll
-        // Additional small adjustment: ensure cards have enough time before they move
-        console.log("Cinematic slow stack — cards centered, movement slower, content fully readable");
-    })();
+      }
+    }
+  })
+  .to(circ,{width:diag,height:diag,duration:.8,ease:'power2.inOut'})
+  .to(title,{color:'var(--ink)',duration:.01},'.49')
+  .to(sub,{color:'#8a8278',duration:.01},'.49');
+})();
+
+/* ══════════════════════════════════
+   9. TYPOGRAPHY BREATHING
+══════════════════════════════════ */
+(()=>{
+  const lines=gsap.utils.toArray('.tyl');
+  lines.forEach((line,i)=>{
+    const finalLS=line.dataset.ls||'.12em';
+    gsap.timeline({
+      scrollTrigger:{
+        trigger:'#typo',
+        start:`top+=${i*17}% 82%`,
+        end:`top+=${i*17+18}% 38%`,
+        scrub:.65,
+        toggleActions:'play none none reverse'
+      }
+    })
+    .to(line,{letterSpacing:finalLS,color:'var(--paper)',duration:1,ease:'power2.out'});
+  });
+})();
+
+/* ─── CONTACT ENTRANCE ─── */
+gsap.from('.ct-h',{y:70,opacity:0,duration:1.2,ease:'expo.out',
+  scrollTrigger:{trigger:'#contact',start:'top 75%',toggleActions:'play none none reverse'}});
+gsap.from('.ct-btn',{x:-35,opacity:0,duration:.8,ease:'power3.out',
+  scrollTrigger:{trigger:'.ct-btn',start:'top 88%',toggleActions:'play none none reverse'}});
+gsap.from('.ct-link',{y:16,opacity:0,stagger:.06,duration:.6,ease:'power3.out',
+  scrollTrigger:{trigger:'.ct-links',start:'top 92%',toggleActions:'play none none reverse'}});
+
+/* ─── SMOOTH SCROLL (wheel-lerp) ─── */
+let tY=scrollY,cY=scrollY,vel=0;
+function onWhl(e){
+  e.preventDefault();
+  tY=clamp(tY+e.deltaY*.85,0,document.body.scrollHeight-innerHeight);
+}
+if(!('ontouchstart' in window)){
+  addEventListener('wheel',onWhl,{passive:false});
+  (function tickS(){
+    const diff=tY-cY;
+    vel=lerp(vel,diff,.18);
+    cY+=vel*.22;
+    if(Math.abs(diff)>.08)window.scrollTo(0,cY);
+    requestAnimationFrame(tickS);
+  })();
+}
+
+addEventListener('load',()=>ScrollTrigger.refresh());
 </script>
 </body>
 </html>
